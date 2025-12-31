@@ -1,0 +1,6 @@
+.venv
+cache/*
+*.pkl
+*.json
+archive
+*.csv
