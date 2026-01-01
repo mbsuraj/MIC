@@ -198,6 +198,31 @@ class ARIMAForecaster(Forecaster):
 
         # Return as a pandas Series with DateTimeIndex
         return pd.Series(forecasted_values, index=forecast_index)
+    
+    def forecast_with_intervals(self, steps, alpha=0.05):
+        """
+        Forecast with confidence intervals.
+        
+        Parameters:
+        steps (int): Number of steps to forecast
+        alpha (float): Significance level (0.05 for 95% confidence)
+        
+        Returns:
+        dict: {'forecast': Series, 'lower': Series, 'upper': Series}
+        """
+        if self.fitted_model is None:
+            raise ValueError("The model has not been fitted yet.")
+            
+        forecast_result = self.fitted_model.get_forecast(steps=steps)
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        
+        conf_int = forecast_result.conf_int(alpha=alpha)
+        
+        return {
+            'forecast': pd.Series(forecast_result.predicted_mean, index=forecast_index),
+            'lower': pd.Series(conf_int.iloc[:, 0], index=forecast_index),
+            'upper': pd.Series(conf_int.iloc[:, 1], index=forecast_index)
+        }
 
     def plot_fit_vs_actual(self, steps):
         """

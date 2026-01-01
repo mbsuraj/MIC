@@ -6,7 +6,9 @@ from src.models.BayesianSSMForecaster import BayesianSSMForecaster
 from src.models.GBForecaster import GBForecaster
 from src.models.ProphetForecaster import ProphetForecaster
 from src.models.BayesianForecaster import BayesianForecaster
+from src.models.RTForecaster import RTForecaster
 from src.models.ETSForecaster import ETSForecaster
+from src.models.SVForecaster import SVForecaster
 import os
 from src.common.utils import *
 
@@ -70,11 +72,11 @@ class Experimenter:
 
     def load_nonparametric_forecasters(self):
         self.nonparametric_forecasters = {
-                                          "gb_forecaster": GBForecaster,
+                                          # "gb_forecaster": GBForecaster,
                                           # "rt_forecaster": RTForecaster,
-                                          # "sv_forecaster": SVForecaster,
+                                          "sv_forecaster": SVForecaster,
                                           # "nn_forecaster": NNForecaster,
-                                          "prophet_forecaster": ProphetForecaster
+                                          # "prophet_forecaster": ProphetForecaster
         }
 
     def _get_nonparametric_forecasters_kwargs(self, model_name, dataset_name):
@@ -249,8 +251,18 @@ class Experimenter:
         self.training_results.to_csv(os.path.join(PROJECT_ROOT, "output", "training_results.csv"), index=False)
         self.testing_results.to_csv(os.path.join(PROJECT_ROOT, "output", "testing_results.csv"), index=False)
 
+    @staticmethod
+    def _calculate_confidence_level(forecast_values, lower_values, upper_values):
+        """Calculate confidence level based on interval width relative to forecast values"""
+        interval_width = upper_values - lower_values
+        relative_width = interval_width / np.abs(forecast_values)
+
+        # Thresholds based on relative interval width
+        return np.where(relative_width < 0.1, 'high',
+                        np.where(relative_width < 0.3, 'medium', 'low'))
+
     def retrain_best_model_and_forecast_future(self, best_model_name, dataset_name, periods=52):
-        """Retrain the best model on full dataset and generate future forecasts"""
+        """Retrain the best model on full dataset and generate future forecasts with confidence intervals"""
         try:
             target_dataset = dataset_name
             model_type = None
@@ -275,28 +287,53 @@ class Experimenter:
             full_model = model_class(**model_kwargs)
             full_model.fit()
             
-            # Generate future forecasts
-            future_forecast = full_model.forecast(periods)
-            
-            # Convert back to original scale
-            preprocessor = self.preprocessors[target_dataset]
-            if hasattr(future_forecast, 'yhat'):  # Prophet
-                future_values = future_forecast.yhat.values
+            # Generate future forecasts with confidence intervals
+            if hasattr(full_model, 'forecast_with_intervals'):
+                forecast_result = full_model.forecast_with_intervals(periods)
+                
+                # Convert back to original scale
+                preprocessor = self.preprocessors[target_dataset]
+                
+                forecast_original = preprocessor.inverse_transform(forecast_result['forecast'].values)
+                lower_original = preprocessor.inverse_transform(forecast_result['lower'].values)
+                upper_original = preprocessor.inverse_transform(forecast_result['upper'].values)
+                
+                # Create future forecast dataframe with proper index
+                last_date = full_data.index[-1]
+                freq = full_data.index.freq or pd.infer_freq(full_data.index)
+                future_index = pd.date_range(start=last_date, periods=periods + 1, freq=freq)[1:]
+
+                future_df = pd.DataFrame({
+                    f'{best_model_name}_future': forecast_original,
+                    f'{best_model_name}_lower': lower_original,
+                    f'{best_model_name}_upper': upper_original,
+                    'confidence': self._calculate_confidence_level(forecast_original, lower_original, upper_original)
+                }, index=future_index)
+                
+                return future_df
             else:
-                future_values = future_forecast.values if hasattr(future_forecast, 'values') else future_forecast
-            
-            future_original = preprocessor.inverse_transform(future_values)
-            
-            # Create future forecast dataframe with proper index
-            last_date = full_data.index[-1]
-            freq = full_data.index.freq or pd.infer_freq(full_data.index)
-            future_index = pd.date_range(start=last_date, periods=periods + 1, freq=freq)[1:]
-            
-            future_df = pd.DataFrame({
-                f'{best_model_name}_future': future_original
-            }, index=future_index)
-            
-            return future_df
+                # Fallback to regular forecast
+                future_forecast = full_model.forecast(periods)
+                
+                # Convert back to original scale
+                preprocessor = self.preprocessors[target_dataset]
+                if hasattr(future_forecast, 'yhat'):  # Prophet
+                    future_values = future_forecast.yhat.values
+                else:
+                    future_values = future_forecast.values if hasattr(future_forecast, 'values') else future_forecast
+                
+                future_original = preprocessor.inverse_transform(future_values)
+                
+                # Create future forecast dataframe with proper index
+                last_date = full_data.index[-1]
+                freq = full_data.index.freq or pd.infer_freq(full_data.index)
+                future_index = pd.date_range(start=last_date, periods=periods + 1, freq=freq)[1:]
+                
+                future_df = pd.DataFrame({
+                    f'{best_model_name}_future': future_original
+                }, index=future_index)
+                
+                return future_df
             
         except Exception as e:
             print(f"Error generating future forecasts: {str(e)}")
@@ -317,9 +354,9 @@ class Experimenter:
         self.export_experiment_results()
 
 
-# if __name__ == "__main__":
-#     experimenter = Experimenter()
-#     experimenter.load_datasets()
-#     experimenter.get_full_data()
-#     experimenter.load_forecasters()
-#     experimenter.retrain_best_model_and_forecast_future("ets_forecaster", "tsa_checkpoint_travel_count_mon_weekly")
+if __name__ == "__main__":
+    experimenter = Experimenter()
+    experimenter.load_datasets()
+    experimenter.get_full_data()
+    experimenter.load_forecasters()
+    experimenter.retrain_best_model_and_forecast_future("arima_forecaster", "tsa_checkpoint_travel_count_mon_weekly")

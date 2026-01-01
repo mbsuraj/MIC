@@ -52,7 +52,7 @@ def run_forecasting():
             ], capture_output=True, text=True, cwd=project_root, env=env)
             
             if result.returncode == 0:
-                st.session_state.step = 6
+                st.session_state.step = 4
                 st.success("✅ Forecasting completed successfully!")
                 st.rerun()
             else:

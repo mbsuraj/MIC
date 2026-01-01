@@ -101,6 +101,34 @@ class ETSForecaster(Forecaster):
         forecasted_values = self.fitted_model.forecast(steps=steps)
         forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
         return pd.Series(forecasted_values, index=forecast_index)
+    
+    def forecast_with_intervals(self, steps, alpha=0.05):
+        """
+        Forecast with confidence intervals.
+        
+        Parameters:
+        steps (int): Number of steps to forecast
+        alpha (float): Significance level (0.05 for 95% confidence)
+        
+        Returns:
+        dict: {'forecast': Series, 'lower': Series, 'upper': Series}
+        """
+        if self.fitted_model is None:
+            raise ValueError("Model not fitted.")
+            
+        forecast_result = self.fitted_model.get_prediction(start=self.data.index[-1],
+                                                           end=self.data.index[-1] + pd.Timedelta(days=steps * 7),
+                                                           simulate=True,
+                                                           simulate_repetitions=3000)
+        conf_int = forecast_result.pred_int(alpha=alpha)
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+
+        
+        return {
+            'forecast': pd.Series(forecast_result.predicted_mean, index=forecast_index),
+            'lower': pd.Series(conf_int.iloc[:, 0], index=forecast_index),
+            'upper': pd.Series(conf_int.iloc[:, 1], index=forecast_index)
+        }
 
     def plot_fit_vs_actual(self, steps):
         if self.fitted_model is None:

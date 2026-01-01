@@ -5,10 +5,24 @@ import plotly.graph_objects as go
 import os
 import sys
 
-def create_chart_layout(best_model_name):
+@st.cache_data
+def cached_generate_future_forecasts(best_model_name, project_name):
+    """Cached version of future forecast generation"""
+    return generate_future_forecasts(best_model_name, project_name)
+
+@st.cache_data
+def get_best_model_info():
+    """Get best model information from testing results"""
+    web_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(web_dir)
+    testing_results = pd.read_csv(os.path.join(project_root, "output", "testing_results.csv"))
+    best_model_row = testing_results.loc[testing_results['mape'].idxmin()]
+    return best_model_row['model_name'], best_model_row['mape']
+
+def create_chart_layout(mape_score):
     """Create chart layout with transparent background"""
     return {
-        "title": f"Best Model Performance: {best_model_name}",
+        "title": f"Forecast Performance",
         "xaxis_title": "Date",
         "yaxis_title": "Value",
         "yaxis2": dict(
@@ -18,9 +32,15 @@ def create_chart_layout(best_model_name):
             showgrid=False,
             range=[0, 50]
         ),
+        "legend": dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0
+        ),
         "hovermode": 'x unified',
         "height": 600,
-        "legend": dict(x=0.02, y=0.98),
         "plot_bgcolor": 'rgba(0,0,0,0)',
         "paper_bgcolor": 'rgba(0,0,0,0)',
         "font": dict(color='#333333'),
@@ -31,7 +51,18 @@ def create_chart_layout(best_model_name):
         "yaxis": dict(
             gridcolor='rgba(200,200,200,0.3)',
             zerolinecolor='rgba(200,200,200,0.5)'
-        )
+        ),
+        "annotations": [
+            dict(
+                x=0.02, y=0.02,
+                xref="paper", yref="paper",
+                text=f"% Error: {mape_score:.3f}",
+                showarrow=False,
+                bgcolor="rgba(255,255,255,0.8)",
+                bordercolor="rgba(0,0,0,0.2)",
+                borderwidth=1
+            )
+        ]
     }
 
 def generate_future_forecasts(best_model_name, project_name):
@@ -79,27 +110,8 @@ def show_results_dashboard():
         # Load results
         web_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(web_dir)
-        
-        training_results = pd.read_csv(os.path.join(project_root, "output", "training_results.csv"))
-        testing_results = pd.read_csv(os.path.join(project_root, "output", "testing_results.csv"))
-        
-        # Find best model by MAPE
-        best_model_row = testing_results.loc[testing_results['mape'].idxmin()]
-        best_model_name = best_model_row['model_name']
-        
-        # Display best model info with explanations
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("🏆 Best Model", best_model_name)
-        with col2:
-            st.metric("📊 MAPE", f"{best_model_row['mape']:.3f}")
-            with st.expander("ℹ️ What is MAPE?"):
-                st.write("**Mean Absolute Percentage Error** - Average percentage difference between actual and predicted values. Lower is better. 5% = very good, 10% = good, 20% = acceptable.")
-        with col3:
-            st.metric("📈 SMAPE", f"{best_model_row['smape']:.3f}")
-            with st.expander("ℹ️ What is SMAPE?"):
-                st.write("**Symmetric Mean Absolute Percentage Error** - Similar to MAPE but handles zero values better. Lower is better. Range: 0-100%.")
-        
+        best_model_name, mape_score = get_best_model_info()
+
         # Load forecast data for best model
         project_name = st.session_state.project_data['name'].replace(' ', '_').lower()
         
@@ -114,15 +126,48 @@ def show_results_dashboard():
                     break
             except:
                 continue
-        
+
         if best_forecast_data is not None:
             # Generate future forecasts
-            future_df = generate_future_forecasts(best_model_name, project_name)
-            
-            # Calculate cumulative absolute percentage error at each time period
-            y_true = best_forecast_data['y_true']
-            y_pred = best_forecast_data[best_model_name]
-            
+            future_df = cached_generate_future_forecasts(best_model_name, project_name)
+
+            # Create combined dataset for date range selection
+            combined_data = best_forecast_data.copy()
+            if future_df is not None:
+                combined_data = pd.concat([combined_data, future_df])
+
+            # Date range slider
+            if future_df is not None and 'confidence' in future_df.columns:
+                # Default: middle of training to medium confidence end
+                training_mid = best_forecast_data.index[len(best_forecast_data) // 2]
+                medium_end = future_df[future_df['confidence'].isin(['high', 'medium'])].index[-1]
+
+                date_range = st.slider(
+                    "Select forecast period:",
+                    min_value=combined_data.index.min().date(),
+                    max_value=combined_data.index.max().date(),
+                    value=(training_mid.date(), medium_end.date()),
+                    format="YYYY-MM-DD"
+                )
+
+                # Filter data based on date range
+                start_date, end_date = pd.Timestamp(date_range[0]), pd.Timestamp(date_range[1])
+                display_forecast_data = best_forecast_data[
+                    (best_forecast_data.index >= start_date) &
+                    (best_forecast_data.index <= end_date)
+                    ]
+                display_future_df = future_df[
+                    (future_df.index >= start_date) &
+                    (future_df.index <= end_date)
+                    ] if future_df is not None else None
+            else:
+                display_forecast_data = best_forecast_data
+                display_future_df = future_df
+
+            # Update chart creation to use display_forecast_data instead of best_forecast_data
+            y_true = display_forecast_data['y_true']
+            y_pred = display_forecast_data[best_model_name]
+
             # Cumulative absolute percentage error (capped at 100%)
             abs_pct_errors = np.abs((y_true - y_pred) / y_true) * 100
             abs_pct_errors = np.clip(abs_pct_errors, 0, 100)  # Cap between 0-100%
@@ -133,60 +178,69 @@ def show_results_dashboard():
             
             # Add actual vs predicted on primary axis
             fig.add_trace(go.Scatter(
-                x=best_forecast_data.index,
+                x=display_forecast_data.index,
                 y=y_true,
                 mode='lines',
                 name='Actual',
-                line=dict(color='black', width=3)
+                opacity=0.5,
+                line=dict(color='grey', width=2.5)
             ))
             
             fig.add_trace(go.Scatter(
-                x=best_forecast_data.index,
+                x=display_forecast_data.index,
                 y=y_pred,
                 mode='lines',
-                name=f'{best_model_name} Forecast',
-                line=dict(color='blue', width=2, dash='dash')
-            ))
-            
-            # Add cumulative error on secondary axis
-            fig.add_trace(go.Scatter(
-                x=best_forecast_data.index,
-                y=cumulative_errors,
-                mode='lines',
-                name='Cumulative Abs % Error',
-                line=dict(color='red', width=2),
-                yaxis='y2'
+                name=f'Model Fit',
+                opacity=0.7,
+                line=dict(color='#E5E7EB', width=3.5)
             ))
             
             # Add future forecasts if available
-            if future_df is not None:
+            if display_future_df is not None and not display_future_df.empty:
                 fig.add_trace(go.Scatter(
-                    x=future_df.index,
-                    y=future_df.iloc[:, 0],
+                    x=display_future_df.index,
+                    y=display_future_df.iloc[:, 0],
                     mode='lines',
                     name='Future Forecast',
-                    line=dict(color='green', width=2, dash='dot')
+                    opacity=0.7,
+                    line=dict(color='#E5E7EB', width=3.5, dash='dash')
                 ))
-            
+
+                if 'confidence' in display_future_df.columns:
+                    confidence_colors = {'high': 'green', 'medium': 'orange', 'low': 'red'}
+                    for conf_level in ['high', 'medium', 'low']:
+                        mask = display_future_df['confidence'] == conf_level
+                        if mask.any():
+                            fig.add_trace(go.Scatter(
+                                x=display_future_df.index[mask],
+                                y=display_future_df.iloc[:, 0][mask],
+                                mode='markers',
+                                name=f'{conf_level.title()} Confidence',
+                                marker=dict(color=confidence_colors[conf_level], size=8)
+                            ))
+
             # Update layout
-            fig.update_layout(**create_chart_layout(best_model_name))
+
+            fig.update_layout(**create_chart_layout(mape_score))
             st.plotly_chart(fig, use_container_width=True)
             
             # Export option
-            export_data = best_forecast_data.copy()
-            export_data['cumulative_abs_pct_error'] = cumulative_errors
-            
-            # Add future forecasts to export if available
-            if future_df is not None:
-                export_data = pd.concat([export_data, future_df])
-            
+            export_data = display_forecast_data.copy()
+            if display_future_df is not None:
+                export_data = pd.concat([export_data, display_future_df])
+
             export_data.index.name = 'date'
-            
-            csv_data = export_data.to_csv()
+
+            csv_data = export_data.rename(columns={
+                'y_true': 'actual',
+                f'{best_model_name}': 'model_fit',
+                f'{best_model_name}_future': 'forecast'
+            }).loc[:, ['actual', 'model_fit', 'forecast', 'confidence']].to_csv()
+
             st.download_button(
                 label="📥 Download Best Model Results (CSV)",
                 data=csv_data,
-                file_name=f"{project_name}_{best_model_name}_results.csv",
+                file_name=f"{project_name}_results.csv",
                 mime="text/csv",
                 use_container_width=True
             )

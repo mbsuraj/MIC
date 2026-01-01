@@ -1,26 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-def show_project_name_step():
-    st.markdown('<div class="question-container">', unsafe_allow_html=True)
-    st.markdown("### 📝 Let's start with the basics")
-    st.markdown("What would you like to call your forecasting project?")
-    
-    project_name = st.text_input(
-        "",
-        placeholder="e.g., Sales Forecast Q1 2024",
-        key="project_name_input"
-    )
-    
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        if st.button("Next →", disabled=not project_name, use_container_width=True):
-            st.session_state.project_data['name'] = project_name
-            st.session_state.step = 2
-            st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
 def show_uncertainty_type_step():
     st.markdown('<div class="question-container">', unsafe_allow_html=True)
     st.markdown("### 🎯 What type of prediction do you need help with?")
@@ -28,9 +8,9 @@ def show_uncertainty_type_step():
     uncertainty_type = st.selectbox(
         "",
         options=[
-            "📊 Predict future trends (Time-series forecasting)",
+            "📊 Forecast future values (Time-series forecasting)",
             "🎯 Classify data into categories (Coming soon)",
-            "🎲 Run what-if scenarios (Coming soon)"
+            "🎲 Test what-if scenarios (Coming soon)"
         ],
         key="uncertainty_type"
     )
@@ -39,21 +19,17 @@ def show_uncertainty_type_step():
         st.info("This feature is under development. Currently, only time-series forecasting is available.")
     
     col1, col2, col3 = st.columns([1, 1, 1])
-    with col1:
-        if st.button("← Back", use_container_width=True):
-            st.session_state.step = 1
-            st.rerun()
     with col3:
         if st.button("Next →", disabled="Coming soon" in uncertainty_type, use_container_width=True):
             st.session_state.project_data['type'] = 'time-series'
-            st.session_state.step = 3
+            st.session_state.step = 2
             st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
 
 def show_data_upload_step():
     st.markdown('<div class="question-container">', unsafe_allow_html=True)
-    st.markdown("### 📊 Upload your historical data")
+    st.markdown("### 📊 Upload and configure your data")
     st.markdown("We need dates (YYYY-MM-DD format) and numbers. Here's what your data should look like:")
     
     # Show sample data format
@@ -69,6 +45,8 @@ def show_data_upload_step():
         help="Your CSV should have 'date' and 'value' columns"
     )
     
+    data_configured = False
+    
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file)
@@ -83,59 +61,46 @@ def show_data_upload_step():
             st.markdown("**Data Preview:**")
             st.dataframe(df.head(), use_container_width=True)
             
+            # Extract project name from filename
+            project_name = uploaded_file.name.replace('.csv', '').replace(' ', '_').lower()
+            st.session_state.project_data['name'] = project_name
+            
             # Save the data
             st.session_state.project_data['dataframe'] = df
             
-            col1, col2, col3 = st.columns([1, 1, 1])
-            with col1:
-                if st.button("← Back", use_container_width=True):
-                    st.session_state.step = 2
-                    st.rerun()
-            with col3:
-                if st.button("Next →", use_container_width=True):
-                    st.session_state.step = 4
-                    st.rerun()
+            # Data frequency configuration
+            st.markdown("### ⚙️ How often does your data occur?")
+            
+            freq_options = {
+                "Daily": "D",
+                "Weekly (Monday)": "W-MON",
+                "Weekly (Sunday)": "W-SUN",
+                "Monthly": "M",
+                "Quarterly": "Q",
+                "Yearly": "Y"
+            }
+            
+            selected_freq = st.selectbox(
+                "Select your data frequency:",
+                options=list(freq_options.keys()),
+                index=1  # Default to Weekly (Monday)
+            )
+            
+            st.session_state.project_data['freq'] = freq_options[selected_freq]
+            data_configured = True
                     
         except Exception as e:
             st.error(f"❌ Error reading file: {str(e)}")
-    else:
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col1:
-            if st.button("← Back", use_container_width=True):
-                st.session_state.step = 2
-                st.rerun()
     
-    st.markdown('</div>', unsafe_allow_html=True)
-
-def show_data_config_step():
-    st.markdown('<div class="question-container">', unsafe_allow_html=True)
-    st.markdown("### ⚙️ How often does your data occur?")
-    
-    freq_options = {
-        "Daily": "D",
-        "Weekly (Monday)": "W-MON",
-        "Weekly (Sunday)": "W-SUN",
-        "Monthly": "M",
-        "Quarterly": "Q",
-        "Yearly": "Y"
-    }
-    
-    selected_freq = st.selectbox(
-        "Select your data frequency:",
-        options=list(freq_options.keys()),
-        index=1  # Default to Weekly (Monday)
-    )
-    
-    st.session_state.project_data['freq'] = freq_options[selected_freq]
-    
+    # Navigation buttons
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
         if st.button("← Back", use_container_width=True):
-            st.session_state.step = 3
+            st.session_state.step = 1
             st.rerun()
     with col3:
-        if st.button("Next →", use_container_width=True):
-            st.session_state.step = 5
+        if st.button("Next →", disabled=not data_configured, use_container_width=True):
+            st.session_state.step = 3
             st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -157,7 +122,7 @@ def show_ready_step():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
         if st.button("← Back", use_container_width=True):
-            st.session_state.step = 4
+            st.session_state.step = 2
             st.rerun()
     with col3:
         if st.button("📊 Start Forecasting!", use_container_width=True, type="primary"):

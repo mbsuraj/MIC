@@ -197,6 +197,27 @@ class ProphetForecaster(Forecaster):
         future = self.model.make_future_dataframe(periods=steps, freq="W-MON")
         forecast = self.model.predict(future)
         return forecast.tail(steps)
+    
+    def forecast_with_intervals(self, steps, alpha=0.05):
+        """
+        Forecast with confidence intervals.
+        
+        Parameters:
+        steps (int): Number of steps to forecast
+        alpha (float): Significance level (0.05 for 95% confidence)
+        
+        Returns:
+        dict: {'forecast': Series, 'lower': Series, 'upper': Series}
+        """
+        future = self.model.make_future_dataframe(periods=steps, freq="W-MON")
+        forecast = self.model.predict(future)
+        forecast_tail = forecast.tail(steps)
+        
+        return {
+            'forecast': forecast_tail['yhat'],
+            'lower': forecast_tail['yhat_lower'],
+            'upper': forecast_tail['yhat_upper']
+        }
 
     def plot_fit_vs_actual(self, steps):
         """
