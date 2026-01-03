@@ -393,5 +393,5 @@ if __name__ == "__main__":
     experimenter.load_datasets()
     experimenter.get_full_data()
     experimenter.load_forecasters()
-    future_df = experimenter.retrain_best_model_and_forecast_future("prophet_forecaster", "store5product7qty_weekly")
+    future_df = experimenter.retrain_best_model_and_forecast_future("prophet_forecaster", "influenza_cases")
     print(future_df)

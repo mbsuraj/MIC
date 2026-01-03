@@ -146,7 +146,11 @@ def show_results_dashboard():
             if future_df is not None and 'confidence' in future_df.columns:
                 # Default: middle of training to medium confidence end
                 training_mid = best_forecast_data.index[len(best_forecast_data) // 2]
-                medium_end = future_df[future_df['confidence'].isin(['high', 'medium'])].index[-1]
+                if ('medium' not in future_df['confidence'].values) or ('high' not in future_df['confidence'].values):
+                    medium_end = future_df.index[future_df.shape[0]//4]
+                    st.warning("⚠️ Limited forecast confidence available. Please take these predictions with a grain of salt as the model confidence is low for this time period.")
+                else:
+                    medium_end = future_df[future_df['confidence'].isin(['high', 'medium'])].index[-1]
 
                 date_range = st.slider(
                     "Select forecast period:",
