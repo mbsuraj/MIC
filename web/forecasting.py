@@ -34,7 +34,8 @@ def run_forecasting():
             
             config[project_name] = {
                 "format": "%Y-%m-%d",
-                "freq": st.session_state.project_data['freq']
+                "freq": st.session_state.project_data['freq'],
+                "freq_type": st.session_state.project_data['freq_type']
             }
             
             with open(config_path, 'w') as f:

@@ -9,7 +9,7 @@ import os
 import random
 
 class HoltWintersForecaster(Forecaster):
-    def __init__(self, data, trend='add', seasonal='add', seasonal_periods=365, data_freq="Day", name="HoltWinters_model"):
+    def __init__(self, data, trend='add', seasonal='add', seasonal_periods=365, data_freq="Day", name="HoltWinters_model", data_freq_type='week'):
         """
         Initialize the HoltWintersForecaster with time series data and model configuration.
 
@@ -23,7 +23,7 @@ class HoltWintersForecaster(Forecaster):
         self.data = data
         self.trend = trend
         self.seasonal = seasonal
-        self.seasonal_periods = self._get_seasonal_periods(data_freq)
+        self.seasonal_periods = self._get_seasonal_periods(data_freq_type)
         # self.data_freq = data_freq
         self.model = None
         self.fitted_model = None
@@ -32,13 +32,14 @@ class HoltWintersForecaster(Forecaster):
         self.path = self.get_cache_path(name)
         self.fitted_values = None
         self.forecast_values = None
+        self.data_freq_type = data_freq_type
 
-    def _get_seasonal_periods(self, data_freq):
-        output_dict = {"Day": 365,
-                       "MonthBegin": 12,
-                       "Week": 52,
-                       'W-MON': 52}
-        return output_dict[data_freq]
+    def _get_seasonal_periods(self, data_freq_type):
+        output_dict = {"day": [7, 30, 120, 365],
+                       "week": [4, 12, 52],
+                       "month": [3, 12],
+                       'year': [1]}
+        return output_dict[data_freq_type]
 
     def perform_random_search(self, param_grid, n_iter=50):
         """
@@ -144,7 +145,7 @@ class HoltWintersForecaster(Forecaster):
             'trend': [None, 'add', 'mul'],  # Type of trend component
             'damped_trend': [True, False],  # Whether to use damped trend
             'seasonal': [None, 'add', 'mul'],  # Type of seasonal component
-            'seasonal_periods': [4, 12, 26, 52],  # Number of periods in a complete seasonal cycle
+            'seasonal_periods': self.seasonal_periods,  # Number of periods in a complete seasonal cycle
             'initialization_method': ['estimated', 'heuristic', 'legacy-heuristic'],
         }
 

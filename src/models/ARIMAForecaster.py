@@ -9,7 +9,7 @@ import os
 import random
 
 class ARIMAForecaster(Forecaster):
-    def __init__(self, data, order=(1, 0, 0), name="arima_model"):
+    def __init__(self, data, order=(1, 0, 0), name="arima_model", data_freq_type='week'):
         """
         Initialize the ARIMAForecaster with time series data and model order.
 
@@ -28,6 +28,15 @@ class ARIMAForecaster(Forecaster):
         self.path = self.get_cache_path(name)
         self.fitted_values = None
         self.forecast_values = None
+        self.data_freq_type = data_freq_type
+        self.seasonal_periods = self._get_seasonal_periods(data_freq_type)
+
+    def _get_seasonal_periods(self, data_freq_type):
+        output_dict = {"day": [7, 30, 120, 365],
+                       "week": [4, 12, 52],
+                       "month": [3, 12],
+                       'year': [1]}
+        return output_dict[data_freq_type]
 
     def perform_random_search(self, param_grid, n_iter=50):
         """
@@ -116,7 +125,7 @@ class ARIMAForecaster(Forecaster):
             'P': [0, 1, 2],  # Seasonal AR order
             'D': [0, 1],  # Seasonal difference order
             'Q': [0, 1, 2],  # Seasonal MA order
-            's': [4, 12],  # Seasonal periods (e.g., 4 for quarterly, 12 for monthly)
+            's': self.seasonal_periods,  # Seasonal periods (e.g., 4 for quarterly, 12 for monthly)
             'trend': ['n', 'c', 't', 'ct'],  # Trend terms
             'seasonal': [True, False]  # Whether to include seasonal component
         }

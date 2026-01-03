@@ -55,16 +55,20 @@ class Experimenter:
         }
 
     def _get_parametric_forecasters_kwargs(self, model_name, dataset_name):
+        freq_type = self.dg._config[dataset_name]['freq_type']
         parametric_forecasters_kwargs = {"ar_forecaster": {"data": self._data, "lags": 5,
                                                            "name": f"{dataset_name}_ar_forecaster"},
                                          "holt_winters_forecaster": {"data": self._data,
                                                             "data_freq": self._data.index.freq.freqstr,
-                                                            "name": f"{dataset_name}_holt_winters_forecaster"},
+                                                            "name": f"{dataset_name}_holt_winters_forecaster",
+                                                            "data_freq_type": freq_type},
                                          "ets_forecaster": {"data": self._data,
-                                                                     "data_freq": self._data.index.freq.freqstr,
-                                                                     "name": f"{dataset_name}_ets_forecaster"},
+                                                             "data_freq": self._data.index.freq.freqstr,
+                                                             "name": f"{dataset_name}_ets_forecaster",
+                                                             "data_freq_type": freq_type},
                                          "arima_forecaster": {"data": self._data, "order": (2, 1, 2),
-                                                              "name": f"{dataset_name}_arima_forecaster"},
+                                                              "name": f"{dataset_name}_arima_forecaster",
+                                                              "data_freq_type": freq_type},
                                          "bayesian_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr,
                                                               "name": f"{dataset_name}_bayesian_forecaster"},
                                          "bayesian_ssm_forecaster": {"data": self._data,
@@ -77,9 +81,9 @@ class Experimenter:
         self.nonparametric_forecasters = {
                                           # "gb_forecaster": GBForecaster,
                                           # "rt_forecaster": RTForecaster,
-                                          "sv_forecaster": SVForecaster,
+                                          # "sv_forecaster": SVForecaster,
                                           # "nn_forecaster": NNForecaster,
-                                          # "prophet_forecaster": ProphetForecaster
+                                          "prophet_forecaster": ProphetForecaster
         }
 
     def _get_nonparametric_forecasters_kwargs(self, model_name, dataset_name):
@@ -389,4 +393,5 @@ if __name__ == "__main__":
     experimenter.load_datasets()
     experimenter.get_full_data()
     experimenter.load_forecasters()
-    experimenter.retrain_best_model_and_forecast_future("ets_forecaster", "tsa_checkpoint_travel_count_mon_weekly")
+    future_df = experimenter.retrain_best_model_and_forecast_future("prophet_forecaster", "store5product7qty_weekly")
+    print(future_df)

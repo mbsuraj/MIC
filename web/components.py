@@ -72,12 +72,12 @@ def show_data_upload_step():
             st.markdown("### ⚙️ How often does your data occur?")
             
             freq_options = {
-                "Daily": "D",
-                "Weekly (Monday)": "W-MON",
-                "Weekly (Sunday)": "W-SUN",
-                "Monthly": "M",
-                "Quarterly": "Q",
-                "Yearly": "Y"
+                "Daily": ("D", "day"),
+                "Weekly (Monday)": ("W-MON", "week"),
+                "Weekly (Sunday)": ("W-SUN", "week"),
+                "Monthly": ("M", "month"),
+                "Quarterly": ("Q", "quarter"),
+                "Yearly": ("Y", "year")
             }
             
             selected_freq = st.selectbox(
@@ -86,7 +86,9 @@ def show_data_upload_step():
                 index=1  # Default to Weekly (Monday)
             )
             
-            st.session_state.project_data['freq'] = freq_options[selected_freq]
+            freq, freq_type = freq_options[selected_freq]
+            st.session_state.project_data['freq'] = freq
+            st.session_state.project_data['freq_type'] = freq_type
             data_configured = True
                     
         except Exception as e:

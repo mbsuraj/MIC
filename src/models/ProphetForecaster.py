@@ -118,6 +118,8 @@ class ProphetForecaster(Forecaster):
         Fit the Prophet model with given parameters.
         """
         df = self.prepare_data()
+        if "n_changepoints" in params:
+            params["n_changepoints"] = int(params["n_changepoints"])
         self.model = Prophet(**params)
         self.model.fit(df)
         self.fitted_values = self.model.predict(df)

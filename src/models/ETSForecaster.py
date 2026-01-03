@@ -9,13 +9,13 @@ import os
 import random
 
 class ETSForecaster(Forecaster):
-    def __init__(self, data, error='add', trend='add', seasonal='add', seasonal_periods=52, data_freq='W-MON', name="ETS_model"):
+    def __init__(self, data, error='add', trend='add', seasonal='add', seasonal_periods=52, data_freq='W-MON', name="ETS_model", data_freq_type='week'):
         super().__init__()
         self.data = data
         self.error = error
         self.trend = trend
         self.seasonal = seasonal
-        self.seasonal_periods = self._get_seasonal_periods(data_freq)
+        self.seasonal_periods = self._get_seasonal_periods(data_freq_type)
         self.model = None
         self.fitted_model = None
         self.metrics = None
@@ -23,10 +23,14 @@ class ETSForecaster(Forecaster):
         self.path = self.get_cache_path(name)
         self.fitted_values = None
         self.forecast_values = None
+        self.data_freq_type = data_freq_type
 
-    def _get_seasonal_periods(self, data_freq):
-        output_dict = {"Day": 365, "MonthBegin": 12, "Week": 52, 'W-MON': 52}
-        return output_dict.get(data_freq, 52)
+    def _get_seasonal_periods(self, data_freq_type):
+        output_dict = {"day": [7, 30, 120, 365],
+                       "week": [4, 12, 52],
+                       "month": [3, 12],
+                       'year': [1]}
+        return output_dict[data_freq_type]
 
     def perform_random_search(self, param_grid, n_iter=50):
         best_rmse = float('inf')
@@ -101,7 +105,7 @@ class ETSForecaster(Forecaster):
             'error': ['add', 'mul'],
             'trend': [None, 'add', 'mul'],
             'seasonal': [None, 'add', 'mul'],
-            'seasonal_periods': [4, 12, 26, 52],
+            'seasonal_periods': self.seasonal_periods,
             'damped_trend': [True, False]
         }
 
