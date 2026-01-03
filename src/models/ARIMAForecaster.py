@@ -104,7 +104,7 @@ class ARIMAForecaster(Forecaster):
 
         return best_model
 
-    def fit(self):
+    def search_and_fit(self):
         """
         Fit the ARIMA model on the provided data with parameter search.
         """
@@ -128,7 +128,27 @@ class ARIMAForecaster(Forecaster):
         self.fitted_values = self.fitted_model.predict(start=0, end=len(self.data) - 1)
 
         # Save the search results
-        self.save_search_results('ARIMAForecaster')
+        self.save_search_results('arima_forecaster')
+
+    def fit(self, params):
+        """
+        Fit the ARIMA model on the provided data.
+        """
+        # Create order tuple from parameters
+        order = (params['p'], params['d'], params['q'])
+        seasonal_order = (params['P'], params['D'], params['Q'], params['s']) if params['seasonal'] else None
+
+        # Fit model with current parameters
+        model = ARIMA(
+            self.data,
+            order=order,
+            seasonal_order=seasonal_order,
+            trend=params['trend']
+        )
+        model.initialize_approximate_diffuse()
+        self.fitted_model = model.fit()
+        self.fitted_values = self.fitted_model.predict(start=0, end=len(self.data) - 1)
+
 
     def log_metrics(self):
         """
@@ -167,7 +187,7 @@ class ARIMAForecaster(Forecaster):
             self.fitted_values = self.fitted_model.fittedvalues
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
     def output(self):
         """

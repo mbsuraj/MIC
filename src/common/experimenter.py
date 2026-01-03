@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 from src.common.dataGenerator import DataGenerator
 from src.common.dataPreprocessor import DataPreprocessor
@@ -19,6 +21,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 DIRECTORY_PATH = os.path.join(PROJECT_ROOT, "data")
 CONFIG_PATH = os.path.join(PROJECT_ROOT, "config", "data_config.json")
 FITS_FORECASTS_EXPORT = os.path.join(PROJECT_ROOT, "output")
+MODEL_SEARCH_RESULTS = os.path.join(PROJECT_ROOT, "model_search_results", "hyperparameter_search_results.json")
 TESTING_HORIZON = 52
 LOAD_MODEL = True
 
@@ -53,20 +56,20 @@ class Experimenter:
 
     def _get_parametric_forecasters_kwargs(self, model_name, dataset_name):
         parametric_forecasters_kwargs = {"ar_forecaster": {"data": self._data, "lags": 5,
-                                                           "name": f"{dataset_name}_ar_model"},
+                                                           "name": f"{dataset_name}_ar_forecaster"},
                                          "holt_winters_forecaster": {"data": self._data,
                                                             "data_freq": self._data.index.freq.freqstr,
-                                                            "name": f"{dataset_name}_holt_winters_model"},
+                                                            "name": f"{dataset_name}_holt_winters_forecaster"},
                                          "ets_forecaster": {"data": self._data,
                                                                      "data_freq": self._data.index.freq.freqstr,
-                                                                     "name": f"{dataset_name}_ets_model"},
+                                                                     "name": f"{dataset_name}_ets_forecaster"},
                                          "arima_forecaster": {"data": self._data, "order": (2, 1, 2),
-                                                              "name": f"{dataset_name}_arima_model"},
+                                                              "name": f"{dataset_name}_arima_forecaster"},
                                          "bayesian_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr,
-                                                              "name": f"{dataset_name}_bayesian_model"},
+                                                              "name": f"{dataset_name}_bayesian_forecaster"},
                                          "bayesian_ssm_forecaster": {"data": self._data,
                                                                  "data_freq": self._data.index.freq.freqstr,
-                                                                 "name": f"{dataset_name}_bayesian_ssm_model"}
+                                                                 "name": f"{dataset_name}_bayesian_ssm_forecaster"}
                                          }
         return parametric_forecasters_kwargs[model_name]
 
@@ -81,11 +84,11 @@ class Experimenter:
 
     def _get_nonparametric_forecasters_kwargs(self, model_name, dataset_name):
         nonparametric_forecasters_kwargs = {
-            "gb_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_gb_model"},
-            "rt_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_rt_model"},
-            "sv_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_sv_model"},
-            "nn_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_nn_model"},
-            "prophet_forecaster": {"data": self._data, "name": f"{dataset_name}_prophet_model"}
+            "gb_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_gb_forecaster"},
+            "rt_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_rt_forecaster"},
+            "sv_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_sv_forecaster"},
+            "nn_forecaster": {"data": self._data, "lags": 10, "name": f"{dataset_name}_nn_forecaster"},
+            "prophet_forecaster": {"data": self._data, "name": f"{dataset_name}_prophet_forecaster"}
         }
         return nonparametric_forecasters_kwargs[model_name]
 
@@ -137,7 +140,7 @@ class Experimenter:
                 if self._load_model:
                     defined_model.load_model()
                 else:
-                    defined_model.fit()
+                    defined_model.search_and_fit()
                 y_true = self._data if model_name != "ar_forecaster" else self._data.iloc[defined_model.lags:]
                 y_pred = defined_model.fitted_values
                 y_true_original, y_pred_original = self._get_inverse_values(y_true, y_pred, dataset_name)
@@ -185,7 +188,7 @@ class Experimenter:
                 if self._load_model:
                     defined_model.load_model()
                 else:
-                    defined_model.fit()
+                    defined_model.search_and_fit()
                 y_true = self._data if model_name == "prophet_forecaster" else self._data.iloc[defined_model.lags:]
                 y_pred = pd.Series(defined_model.fitted_values.yhat.values, index=self._data.index) if model_name == "prophet_forecaster" else pd.Series(defined_model.fitted_values, index=self._data.index[defined_model.lags:])
                 y_true_original, y_pred_original = self._get_inverse_values(y_true, y_pred, dataset_name)
@@ -258,12 +261,20 @@ class Experimenter:
         relative_width = interval_width / np.abs(forecast_values)
 
         # Thresholds based on relative interval width
-        return np.where(relative_width < 0.1, 'high',
-                        np.where(relative_width < 0.3, 'medium', 'low'))
+        return np.where(relative_width < 0.2, 'high',
+                        np.where(relative_width < 0.4, 'medium', 'low'))
+
+    def _get_search_results(self):
+        """Load search results from JSON file"""
+        with open(MODEL_SEARCH_RESULTS, "r") as f:
+            search_results = pd.json_normalize(json.load(f))
+        return search_results
+
 
     def retrain_best_model_and_forecast_future(self, best_model_name, dataset_name, periods=52):
         """Retrain the best model on full dataset and generate future forecasts with confidence intervals"""
         try:
+            search_results = self._get_search_results()
             target_dataset = dataset_name
             model_type = None
             if best_model_name in self.parametric_forecasters:
@@ -285,8 +296,27 @@ class Experimenter:
             
             # Create and fit model on full dataset
             full_model = model_class(**model_kwargs)
-            full_model.fit()
-            
+
+            # full_model.search_and_fit()
+            def get_best_model_params(search_results, dataset_name, best_model_name):
+                best_model_params = search_results.loc[
+                    (search_results['dataset_info.dataset_name_and_type'] == f"{dataset_name}_{best_model_name}") &
+                    (search_results['model'].apply(str.lower) == best_model_name.lower()),
+                    :
+                ]
+                best_model_params = best_model_params.loc[best_model_params.date == best_model_params.date.max(), :]
+                best_model_params = best_model_params.loc[:, [c for c in best_model_params.columns
+                                                              if c.find("best_params") != -1 and
+                                                              not best_model_params[c].isna().all()]
+                ]
+                best_model_params.columns = [c.replace("best_params.", "") for c in best_model_params.columns]
+                best_model_params = best_model_params.to_dict(orient='records')[0]
+                return best_model_params
+
+            best_model_params = get_best_model_params(search_results, target_dataset, best_model_name)
+
+            full_model.fit(best_model_params)
+
             # Generate future forecasts with confidence intervals
             if hasattr(full_model, 'forecast_with_intervals'):
                 forecast_result = full_model.forecast_with_intervals(periods)
@@ -359,4 +389,4 @@ if __name__ == "__main__":
     experimenter.load_datasets()
     experimenter.get_full_data()
     experimenter.load_forecasters()
-    experimenter.retrain_best_model_and_forecast_future("arima_forecaster", "tsa_checkpoint_travel_count_mon_weekly")
+    experimenter.retrain_best_model_and_forecast_future("ets_forecaster", "tsa_checkpoint_travel_count_mon_weekly")

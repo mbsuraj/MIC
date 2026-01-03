@@ -113,7 +113,16 @@ class ProphetForecaster(Forecaster):
 
         return best_model
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the Prophet model with given parameters.
+        """
+        df = self.prepare_data()
+        self.model = Prophet(**params)
+        self.model.fit(df)
+        self.fitted_values = self.model.predict(df)
+
+    def search_and_fit(self):
         """
         Train the Prophet model on the provided data.
         """
@@ -133,7 +142,7 @@ class ProphetForecaster(Forecaster):
             param_grid=param_grid,
             n_iter=50  # adjust based on your computational resources
         )
-        self.save_search_results('Prophet')
+        self.save_search_results('prophet_forecaster')
         print("Model fitted successfully.")
         self.fitted_values = self.model.predict(df)
 
@@ -162,7 +171,7 @@ class ProphetForecaster(Forecaster):
             self.fitted_values = self.model.predict(df)
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
 
     def output(self):

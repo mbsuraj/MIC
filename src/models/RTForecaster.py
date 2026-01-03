@@ -121,7 +121,21 @@ class RTForecaster(Forecaster):
             raise ValueError("No random search has been performed yet. "
                              "Run perform_randomized_search first.")
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the Random Forest model with given parameters.
+        """
+        if self.feature_data is None:
+            self.create_features()
+        
+        X = self.feature_data.drop("value", axis=1)
+        y = self.feature_data["value"]
+        
+        self.model = RandomForestRegressor(**params)
+        self.model.fit(X, y)
+        self.fitted_values = self.model.predict(X)
+
+    def search_and_fit(self):
         """
         Train the Random Tree model on the provided data.
         """
@@ -184,7 +198,7 @@ class RTForecaster(Forecaster):
             self.fitted_values = self.model.predict(X)
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
     def output(self):
         """

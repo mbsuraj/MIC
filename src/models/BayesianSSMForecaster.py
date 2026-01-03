@@ -35,7 +35,26 @@ class BayesianSSMForecaster(Forecaster):
         # season = st.TimeSeasonality(season_length=self.seasonal_periods, name='season', innovations=False)
         return (grw + season).build()
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the Bayesian SSM model with given parameters.
+        """
+        # For Bayesian SSM models, params would contain hyperparameters
+        # This is a simplified version - actual implementation would depend on specific parameters
+        values = pd.DataFrame(self.data.values.flatten(), index=self.data.index)
+        self.model = self._build_ssm()
+        with pm.Model(coords=self.model.coords):
+            P0 = pm.Deterministic('P0', pt.eye(self.model.k_states) * params.get('P0_scale', 1.0), dims=self.model.param_dims['P0'])
+            initial_trend = pm.Deterministic('initial_trend', pt.zeros(1), dims=self.model.param_dims['initial_trend'])
+            season = pm.Normal('season', sigma=params.get('season_sigma', 0.01), dims=self.model.param_dims['season'])
+            sigma_season = pm.HalfNormal('sigma_season', sigma=params.get('sigma_season', 0.01))
+            sigma_trend = pm.HalfNormal('sigma_trend', sigma=params.get('sigma_trend', 0.01), dims=self.model.param_dims['sigma_trend'])
+            self.model.build_statespace_graph(values)
+            self.trace = pm.sample(draws=params.get('draws', 500), tune=params.get('tune', 100), chains=2, return_inferencedata=False, target_accept=0.9)
+        
+        self.fitted_values = self._get_fitted_values()
+
+    def search_and_fit(self):
         values = pd.DataFrame(self.data.values.flatten(), index=self.data.index)
         self.model = self._build_ssm()
         with pm.Model(coords=self.model.coords):
@@ -124,7 +143,7 @@ class BayesianSSMForecaster(Forecaster):
             print(f"Model loaded from {self.path}")
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
     def output(self):
         if self.trace is not None:

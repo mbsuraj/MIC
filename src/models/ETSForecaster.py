@@ -81,7 +81,22 @@ class ETSForecaster(Forecaster):
 
         return best_model
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the ETS model with given parameters.
+        """
+        model = ETSModel(
+            self.data.iloc[:, 0] if not isinstance(self.data, pd.Series) else self.data,
+            error=params['error'],
+            trend=params['trend'],
+            seasonal=params['seasonal'],
+            seasonal_periods=params['seasonal_periods'],
+            damped_trend=params['damped_trend']
+        )
+        self.fitted_model = model.fit()
+        self.fitted_values = self.fitted_model.fittedvalues
+
+    def search_and_fit(self):
         param_grid = {
             'error': ['add', 'mul'],
             'trend': [None, 'add', 'mul'],
@@ -92,7 +107,7 @@ class ETSForecaster(Forecaster):
 
         self.fitted_model = self.perform_random_search(param_grid)
         self.fitted_values = self.fitted_model.fittedvalues
-        self.save_search_results('ETSForecaster')
+        self.save_search_results('ets_forecaster')
 
     def forecast(self, steps):
         if self.fitted_model is None:
@@ -123,7 +138,6 @@ class ETSForecaster(Forecaster):
         conf_int = forecast_result.pred_int(alpha=alpha)
         forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
 
-        
         return {
             'forecast': pd.Series(forecast_result.predicted_mean, index=forecast_index),
             'lower': pd.Series(conf_int.iloc[:, 0], index=forecast_index),
@@ -167,7 +181,7 @@ class ETSForecaster(Forecaster):
             self.fitted_values = self.fitted_model.fittedvalues
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
     def output(self):
         if self.fitted_model is not None:

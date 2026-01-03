@@ -27,7 +27,33 @@ class BayesianForecaster(Forecaster):
         output_dict = {"Day": 365, "MonthBegin": 12, "Week": 52, 'W-MON': 52}
         return output_dict.get(data_freq, 52)
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the Bayesian model with given parameters.
+        """
+        # For Bayesian models, params would contain hyperparameters
+        # This is a simplified version - actual implementation would depend on specific parameters
+        values = self.data.values.flatten()
+        with pm.Model() as model:
+            baseline = pm.Normal('baseline', mu=np.median(values), sigma=params.get('baseline_sigma', 2))
+            trend = pm.Normal('trend', mu=0, sigma=params.get('trend_sigma', 1))
+            seasonal_raw = pm.Normal('seasonal_raw', mu=0, sigma=params.get('seasonal_sigma', 2), shape=self.seasonal_periods)
+            sigma = pm.HalfNormal('sigma', sigma=params.get('obs_sigma', 3))
+            seasonal = pm.Deterministic('seasonal', seasonal_raw - pm.math.mean(seasonal_raw))
+            
+            t = np.arange(self.data.shape[0])
+            seasonal_idx = t % self.seasonal_periods
+            mean = baseline + trend * t + seasonal[seasonal_idx]
+            obs = pm.Normal('obs', mu=mean, sigma=sigma, observed=self.data.values)
+            
+            self.trace = pm.sample(draws=params.get('draws', 1000), tune=params.get('tune', 500), return_inferencedata=False, chains=2)
+        
+        self.baseline = np.median(self.trace['baseline'])
+        self.trend = np.median(self.trace['trend'])
+        self.seasonal = np.median(self.trace['seasonal'], axis=0)
+        self.fitted_values = self._get_fitted_values()
+
+    def search_and_fit(self):
         values = self.data.values.flatten()
         with pm.Model() as model:
             baseline_mu = np.median(values)
@@ -143,7 +169,7 @@ class BayesianForecaster(Forecaster):
             print(f"Model loaded from {self.path}")
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
     def output(self):
         if self.trace is not None:

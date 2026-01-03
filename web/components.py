@@ -109,8 +109,8 @@ def show_ready_step():
     from forecasting import run_forecasting
     
     st.markdown('<div class="question-container">', unsafe_allow_html=True)
-    st.markdown("### 🚀 Ready to see the future?")
-    st.markdown("We'll analyze your data using 6 different forecasting methods and show you which works best!")
+    st.markdown("### 🚀 Ready to view Forecast?")
+    st.markdown("We will take care of the rest. We will be building forecasting model for you!")
     
     # Show summary
     st.markdown("**Project Summary:**")

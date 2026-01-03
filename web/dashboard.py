@@ -1,3 +1,4 @@
+import pickle
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -15,9 +16,14 @@ def get_best_model_info():
     """Get best model information from testing results"""
     web_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(web_dir)
+    project_name = st.session_state.project_data['name'].replace(' ', '_').lower()
     testing_results = pd.read_csv(os.path.join(project_root, "output", "testing_results.csv"))
-    best_model_row = testing_results.loc[testing_results['mape'].idxmin()]
-    return best_model_row['model_name'], best_model_row['mape']
+    best_model_row = testing_results.loc[testing_results['weighted_mape'].idxmin()]
+    model_path = os.path.join(project_root, "cache", f"{project_name}_{best_model_row['model_name']}.pkl")
+    with open(model_path, 'rb') as f:
+        best_model = pickle.load(f)
+
+    return best_model_row['model_name'], best_model_row['weighted_mape']
 
 def create_chart_layout(mape_score):
     """Create chart layout with transparent background"""
@@ -68,7 +74,7 @@ def create_chart_layout(mape_score):
 def generate_future_forecasts(best_model_name, project_name):
     """Generate future forecasts using experimenter"""
     future_df = None
-    with st.spinner("🔄 Generating future forecasts..."):
+    with st.spinner("🔄 Generating forecasts..."):
         try:
             # Temporarily add project root to sys.path for imports
             web_dir = os.path.dirname(os.path.abspath(__file__))
@@ -92,7 +98,7 @@ def generate_future_forecasts(best_model_name, project_name):
             # Generate future forecasts for specific dataset and model
             future_df = experimenter.retrain_best_model_and_forecast_future(best_model_name, dataset_name, periods=52)
             if not future_df.empty:
-                st.success("✅ Future forecasts generated!")
+                st.success("✅ Forecasts generated!")
             else:
                 st.warning(f"Could not generate future forecasts - method returned None for model: {best_model_name}")
                 

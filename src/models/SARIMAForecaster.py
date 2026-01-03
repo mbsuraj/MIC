@@ -27,7 +27,16 @@ class SARIMAForecaster(Forecaster):
         self.name = name
         self.path = self.get_cache_path(name)
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the SARIMA model with given parameters.
+        """
+        order = (params['p'], params['d'], params['q'])
+        seasonal_order = (params['P'], params['D'], params['Q'], params['s']) if params['seasonal'] else None
+        self.model = SARIMAX(self.data, order=order, seasonal_order=seasonal_order)
+        self.fitted_model = self.model.fit(disp=False)
+
+    def search_and_fit(self):
         """
         Fit the SARIMA model on the provided data.
         """
@@ -71,7 +80,7 @@ class SARIMAForecaster(Forecaster):
             print(f"Model loaded from {self.path}")
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
     def output(self):
         """

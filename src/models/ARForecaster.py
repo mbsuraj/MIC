@@ -100,7 +100,21 @@ class ARForecaster(Forecaster):
         self.lags = best_params['lags']
         return best_model
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the AR model with given parameters.
+        """
+        model = AutoReg(
+            self.data,
+            lags=params['lags'],
+            trend=params['trend'],
+            seasonal=params['seasonal']
+        )
+        self.fitted_model = model.fit()
+        self.fitted_values = self.fitted_model.predict(start=params['lags'], end=len(self.data) - 1)
+        self.lags = params['lags']
+
+    def search_and_fit(self):
         """
         Fit the AR model on the provided data with parameter search.
         """
@@ -116,7 +130,7 @@ class ARForecaster(Forecaster):
 
         # Get predictions
         self.fitted_values = self.fitted_model.predict(start=self.lags, end=len(self.data) - 1)
-        self.save_search_results('ARForecaster')
+        self.save_search_results('ar_forecaster')
 
     def log_metrics(self):
         """
@@ -155,7 +169,7 @@ class ARForecaster(Forecaster):
             self.fitted_values = self.fitted_model.predict(start=self.lags, end=len(self.data) - 1)
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
 
     def output(self):

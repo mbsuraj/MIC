@@ -120,7 +120,22 @@ class HoltWintersForecaster(Forecaster):
 
         return best_model
 
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the Holt-Winters model with given parameters.
+        """
+        model = ExponentialSmoothing(
+            self.data,
+            trend=params['trend'],
+            damped_trend=params['damped_trend'],
+            seasonal=params['seasonal'],
+            seasonal_periods=params['seasonal_periods'] if params['seasonal'] is not None else None,
+            initialization_method=params['initialization_method']
+        )
+        self.fitted_model = model.fit()
+        self.fitted_values = self.fitted_model.fittedvalues
+
+    def search_and_fit(self):
         """
         Fit the Holt-Winters model on the provided data with parameter search.
         """
@@ -140,7 +155,7 @@ class HoltWintersForecaster(Forecaster):
         self.fitted_values = self.fitted_model.fittedvalues
 
         # Save the search results
-        self.save_search_results('HoltWintersForecaster')
+        self.save_search_results('holt_winters_forecaster')
 
     def log_metrics(self):
         """
@@ -179,7 +194,7 @@ class HoltWintersForecaster(Forecaster):
             self.fitted_values = self.fitted_model.fittedvalues
         except FileNotFoundError:
             print(f"Model file not found at {self.path}. Fitting new model...")
-            self.fit()
+            self.search_and_fit()
 
     def output(self):
         """

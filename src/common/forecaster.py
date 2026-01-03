@@ -79,7 +79,14 @@ class Forecaster(ABC):
             print(f"Error saving results to JSON: {str(e)}")
 
     @abstractmethod
-    def fit(self):
+    def fit(self, params):
+        """
+        Fit the model with given parameters.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def search_and_fit(self):
         """
         Fit the model on the provided data.
         """
