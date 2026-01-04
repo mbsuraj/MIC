@@ -14,14 +14,14 @@ class GBForecaster(Forecaster):
 
         Parameters:
         data (pd.Series): The time series data to be used for forecasting.
-        lags (int): The number of lagged observations to use as features.
+        lags (int): Unused - kept for compatibility. Lags are now generated based on data_freq.
         name (str): The name for the model, used in paths for saving/loading.
         """
         super().__init__()
         self.random_search_results = None
         self.data = data
         self.data_freq = data_freq
-        self.lags = lags
+        self.lag_periods = self._get_frequency_lags(data_freq)
         self.model = LGBMRegressor()
         self.metrics = None
         self.name = name
@@ -30,13 +30,27 @@ class GBForecaster(Forecaster):
         self.fitted_values = None
         self.forecast_values = None
 
+    def _get_frequency_lags(self, data_freq):
+        """Generate frequency-specific lag periods."""
+        freq_map = {
+            'D': [1, 2, 3, 4, 5, 6, 7, 30, 365],  # Daily: recent days + monthly + yearly
+            'W': [1, 2, 3, 4, 52],  # Weekly: recent weeks + yearly
+            'W-MON': [1, 2, 3, 4, 52],  # Weekly Monday: recent weeks + yearly
+            'M': [1, 2, 3, 12],  # Monthly: recent months + yearly
+            'Q': [1, 2, 4],  # Quarterly: recent quarters + yearly
+            'Y': [1, 2, 3]  # Yearly: recent years
+        }
+        return freq_map.get(data_freq, [1, 2, 3, 4, 5])  # Default fallback
+
     def create_features(self):
         """
-        Generate lagged features and time-based features for the time series.
+        Generate frequency-aware lagged features and time-based features.
         """
         df = pd.DataFrame(self.data.values, columns=["value"], index=self.data.index)
-        for i in range(1, self.lags + 1):
-            df[f"lag_{i}"] = df["value"].shift(i)
+        
+        # Create frequency-specific lag features
+        for lag in self.lag_periods:
+            df[f"lag_{lag}"] = df["value"].shift(lag)
 
         # Add time-based features
         df["month"] = df.index.month
@@ -46,7 +60,7 @@ class GBForecaster(Forecaster):
 
         # Drop rows with NaN values (due to lagging)
         self.feature_data = df.dropna()
-        print("Features created successfully.")
+        print(f"Features created with lags: {self.lag_periods}")
 
     def perform_randomized_search(self, X, y, param_grid, n_iter=50, eval_set=None,
                                   eval_metric='rmse', categorical_feature='auto', cv=5):
@@ -245,6 +259,7 @@ class GBForecaster(Forecaster):
                 print("Training Metrics:")
                 for metric, value in self.metrics.items():
                     print(f"{metric}: {value:.4f}")
+
     def forecast(self, steps):
         """
         Forecast future values using the trained Gradient Boosting model.
@@ -258,27 +273,54 @@ class GBForecaster(Forecaster):
         if self.feature_data is None:
             self.create_features()
 
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
+        # Create future date index
+        forecast_index = pd.date_range(
+            start=self.data.index[-1],
+            periods=steps + 1,
+            freq=self.data_freq
+        )[1:]
+
         forecasted_values = []
-
-        last_known_data = self.feature_data.iloc[-1].drop("value")
-
-        for _ in range(steps):
-            forecast = self.model.predict([last_known_data])[0]
-            forecasted_values.append(forecast)
-
-            # Shift features for the next prediction
-            new_row = pd.Series({
-                f"lag_{i}": last_known_data[f"lag_{i - 1}"] if i > 1 else forecast
-                for i in range(1, self.lags + 1)
-            })
-            new_row["month"] = forecast_index[0].month
-            new_row["day_of_week"] = forecast_index[0].dayofweek
-            new_row["day_of_month"] = forecast_index[0].day
-            new_row["is_weekend"] = int(forecast_index[0].dayofweek >= 5)
-            last_known_data = new_row
+        
+        # Maintain history for lag features (extend original data with forecasts)
+        extended_data = self.data.copy()
+        
+        for step in range(steps):
+            # Create features for current step
+            current_features = self._create_forecast_features(extended_data, forecast_index[step])
+            
+            # Make prediction
+            forecast_value = self.model.predict([current_features])[0]
+            forecasted_values.append(forecast_value)
+            
+            # Extend data with new forecast for next iteration
+            extended_data = pd.concat([
+                extended_data, 
+                pd.Series([forecast_value], index=[forecast_index[step]])
+            ])
 
         return pd.Series(forecasted_values, index=forecast_index)
+
+    def _create_forecast_features(self, data, date):
+        """Create features for a single forecast step."""
+        features = {}
+        
+        # Create lag features
+        for lag in self.lag_periods:
+            if len(data) >= lag:
+                features[f"lag_{lag}"] = data.iloc[-lag]
+            else:
+                features[f"lag_{lag}"] = 0  # Fallback for insufficient history
+        
+        # Add time-based features
+        features["month"] = date.month
+        features["day_of_week"] = date.dayofweek
+        features["day_of_month"] = date.day
+        features["is_weekend"] = int(date.dayofweek >= 5)
+        
+        return pd.Series(features)
+
+
 
     def plot_fit_vs_actual(self, steps):
         """

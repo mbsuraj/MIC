@@ -1,5 +1,4 @@
 import json
-
 import pandas as pd
 from src.common.dataGenerator import DataGenerator
 from src.common.dataPreprocessor import DataPreprocessor
@@ -7,6 +6,7 @@ from src.models.ARIMAForecaster import ARIMAForecaster
 from src.models.BayesianSSMForecaster import BayesianSSMForecaster
 from src.models.GBForecaster import GBForecaster
 from src.models.ProphetForecaster import ProphetForecaster
+from src.models.NNForecaster import NNForecaster
 from src.models.BayesianForecaster import BayesianForecaster
 from src.models.RTForecaster import RTForecaster
 from src.models.ETSForecaster import ETSForecaster
@@ -24,6 +24,7 @@ FITS_FORECASTS_EXPORT = os.path.join(PROJECT_ROOT, "output")
 MODEL_SEARCH_RESULTS = os.path.join(PROJECT_ROOT, "model_search_results", "hyperparameter_search_results.json")
 TESTING_HORIZON = 52
 LOAD_MODEL = True
+
 
 class Experimenter:
     def __init__(self):
@@ -60,42 +61,47 @@ class Experimenter:
                                                            "data_freq": self._data.index.freq.freqstr,
                                                            "name": f"{dataset_name}_ar_forecaster"},
                                          "holt_winters_forecaster": {"data": self._data,
-                                                            "data_freq": self._data.index.freq.freqstr,
-                                                            "name": f"{dataset_name}_holt_winters_forecaster",
-                                                            "data_freq_type": freq_type},
+                                                                     "data_freq": self._data.index.freq.freqstr,
+                                                                     "name": f"{dataset_name}_holt_winters_forecaster",
+                                                                     "data_freq_type": freq_type},
                                          "ets_forecaster": {"data": self._data,
-                                                             "data_freq": self._data.index.freq.freqstr,
-                                                             "name": f"{dataset_name}_ets_forecaster",
-                                                             "data_freq_type": freq_type},
+                                                            "data_freq": self._data.index.freq.freqstr,
+                                                            "name": f"{dataset_name}_ets_forecaster",
+                                                            "data_freq_type": freq_type},
                                          "arima_forecaster": {"data": self._data, "order": (2, 1, 2),
                                                               "data_freq": self._data.index.freq.freqstr,
                                                               "name": f"{dataset_name}_arima_forecaster",
                                                               "data_freq_type": freq_type},
                                          "bayesian_forecaster": {"data": self._data,
                                                                  "data_freq": self._data.index.freq.freqstr,
-                                                              "name": f"{dataset_name}_bayesian_forecaster"},
+                                                                 "name": f"{dataset_name}_bayesian_forecaster"},
                                          "bayesian_ssm_forecaster": {"data": self._data,
-                                                                 "data_freq": self._data.index.freq.freqstr,
-                                                                 "name": f"{dataset_name}_bayesian_ssm_forecaster"}
+                                                                     "data_freq": self._data.index.freq.freqstr,
+                                                                     "name": f"{dataset_name}_bayesian_ssm_forecaster"}
                                          }
         return parametric_forecasters_kwargs[model_name]
 
     def load_nonparametric_forecasters(self):
         self.nonparametric_forecasters = {
-                                          # "gb_forecaster": GBForecaster,
-                                          # "rt_forecaster": RTForecaster,
-                                          # "sv_forecaster": SVForecaster,
-                                          # "nn_forecaster": NNForecaster,
-                                          "prophet_forecaster": ProphetForecaster
+            "gb_forecaster": GBForecaster,
+            "rt_forecaster": RTForecaster,
+            "sv_forecaster": SVForecaster,
+            "nn_forecaster": NNForecaster,
+            "prophet_forecaster": ProphetForecaster
         }
 
     def _get_nonparametric_forecasters_kwargs(self, model_name, dataset_name):
         nonparametric_forecasters_kwargs = {
-            "gb_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10, "name": f"{dataset_name}_gb_forecaster"},
-            "rt_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10, "name": f"{dataset_name}_rt_forecaster"},
-            "sv_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10, "name": f"{dataset_name}_sv_forecaster"},
-            "nn_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10, "name": f"{dataset_name}_nn_forecaster"},
-            "prophet_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "name": f"{dataset_name}_prophet_forecaster"}
+            "gb_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10,
+                              "name": f"{dataset_name}_gb_forecaster"},
+            "rt_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10,
+                              "name": f"{dataset_name}_rt_forecaster"},
+            "sv_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10,
+                              "name": f"{dataset_name}_sv_forecaster"},
+            "nn_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr, "lags": 10,
+                              "name": f"{dataset_name}_nn_forecaster"},
+            "prophet_forecaster": {"data": self._data, "data_freq": self._data.index.freq.freqstr,
+                                   "name": f"{dataset_name}_prophet_forecaster"}
         }
         return nonparametric_forecasters_kwargs[model_name]
 
@@ -112,7 +118,7 @@ class Experimenter:
             print(name, end="\n\n")
             # Create preprocessor for each dataset
             self.preprocessors[name] = DataPreprocessor(data)
-            
+
             # Use scaled data for train/test split
             scaled_data = self.preprocessors[name].scaled_data
             self.training_datasets[name] = scaled_data.iloc[:-self.testing_horizon]
@@ -139,7 +145,8 @@ class Experimenter:
             if data is None:
                 continue
             self._data = data.dropna()
-            _fits_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values), columns=['y_true'], index=self._data.index)
+            _fits_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values),
+                                        columns=['y_true'], index=self._data.index)
             for model_name, model in self.parametric_forecasters.items():
                 model_kwargs = self._get_parametric_forecasters_kwargs(model_name=model_name,
                                                                        dataset_name=dataset_name)
@@ -180,26 +187,29 @@ class Experimenter:
         }
         return res
 
-
     def define_fit_and_save_nonparametric_models(self):
         for dataset_name, data in self.training_datasets.items():
             self.nonparametric_forecasters_trained[dataset_name] = dict()
             if data is None:
                 continue
             self._data = data.dropna()
-            _fits_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values), columns=['y_true'], index=self._data.index)
+            _fits_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values),
+                                        columns=['y_true'], index=self._data.index)
             for model_name, model in self.nonparametric_forecasters.items():
                 model_kwargs = self._get_nonparametric_forecasters_kwargs(model_name=model_name,
-                                                                       dataset_name=dataset_name)
+                                                                          dataset_name=dataset_name)
                 defined_model = model(**model_kwargs)
                 if self._load_model:
                     defined_model.load_model()
                 else:
                     defined_model.search_and_fit()
-                y_true = self._data if model_name == "prophet_forecaster" else self._data.iloc[defined_model.lags:]
-                y_pred = pd.Series(defined_model.fitted_values.yhat.values, index=self._data.index) if model_name == "prophet_forecaster" else pd.Series(defined_model.fitted_values, index=self._data.index[defined_model.lags:])
+                y_true = self._data if model_name == "prophet_forecaster" else defined_model.feature_data['value']
+                y_pred = pd.Series(defined_model.fitted_values.yhat.values, index=self._data.index) if model_name == "prophet_forecaster" else pd.Series(
+                    defined_model.fitted_values, index=defined_model.feature_data['value'])
                 y_true_original, y_pred_original = self._get_inverse_values(y_true, y_pred, dataset_name)
-                _fits_export[model_name] = y_pred_original if model_name == "prophet_forecaster" else np.concatenate((np.full(defined_model.lags, np.nan), y_pred_original), axis=0)
+                _fits_export[model_name] = y_pred_original if model_name == "prophet_forecaster" else np.concatenate(
+                    (np.full(self._data.shape[0] - defined_model.feature_data.shape[0], np.nan), y_pred_original),
+                    axis=0)
                 metrics = self._calculate_metrics(y_true_original, y_pred_original, dataset_name)
                 self._log_data_model_training_metrics(dataset_name, model_name, metrics)
                 defined_model.save_model()
@@ -229,7 +239,8 @@ class Experimenter:
             if data is None:
                 continue
             self._data = data
-            _forecasts_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values), columns=['y_true'], index=self._data.index)
+            _forecasts_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values),
+                                             columns=['y_true'], index=self._data.index)
             for model_name, model in self.parametric_forecasters_trained[dataset_name].items():
                 forecast = model.forecast(52) if model_name != "garch_forecaster" else model._inverse_scale_data(
                     model.forecast(52))
@@ -246,11 +257,14 @@ class Experimenter:
             if data is None:
                 continue
             self._data = data
-            _forecasts_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values), columns=['y_true'], index=self._data.index)
+            _forecasts_export = pd.DataFrame(self.preprocessors[dataset_name].inverse_transform(self._data.values),
+                                             columns=['y_true'], index=self._data.index)
             for model_name, model in self.nonparametric_forecasters_trained[dataset_name].items():
                 forecast = model.forecast(52)
                 y_true = self._data
-                y_pred = pd.Series(forecast.yhat.values, index=self._data.index) if model_name == "prophet_forecaster" else pd.Series(forecast.values, index=self._data.index)
+                y_pred = pd.Series(forecast.yhat.values,
+                                   index=self._data.index) if model_name == "prophet_forecaster" else pd.Series(
+                    forecast.values, index=self._data.index)
                 y_true_original, y_pred_original = self._get_inverse_values(y_true, y_pred, dataset_name)
                 _forecasts_export[model_name] = y_pred_original
                 metrics = self._calculate_metrics(y_true_original, y_pred_original, dataset_name)
@@ -277,7 +291,6 @@ class Experimenter:
             search_results = pd.json_normalize(json.load(f))
         return search_results
 
-
     def retrain_best_model_and_forecast_future(self, best_model_name, dataset_name, periods=52):
         """Retrain the best model on full dataset and generate future forecasts with confidence intervals"""
         try:
@@ -288,11 +301,11 @@ class Experimenter:
                 model_type = 'parametric'
             elif best_model_name in self.nonparametric_forecasters:
                 model_type = 'nonparametric'
-            
+
             # Get full dataset (training + testing)
             full_data = self._full_data_dict[target_dataset]
             self._data = full_data.dropna()
-            
+
             # Get model class and kwargs
             if model_type == 'parametric':
                 model_class = self.parametric_forecasters[best_model_name]
@@ -300,7 +313,7 @@ class Experimenter:
             else:
                 model_class = self.nonparametric_forecasters[best_model_name]
                 model_kwargs = self._get_nonparametric_forecasters_kwargs(best_model_name, f"{target_dataset}")
-            
+
             # Create and fit model on full dataset
             full_model = model_class(**model_kwargs)
 
@@ -327,14 +340,14 @@ class Experimenter:
             # Generate future forecasts with confidence intervals
             if hasattr(full_model, 'forecast_with_intervals'):
                 forecast_result = full_model.forecast_with_intervals(periods)
-                
+
                 # Convert back to original scale
                 preprocessor = self.preprocessors[target_dataset]
-                
+
                 forecast_original = preprocessor.inverse_transform(forecast_result['forecast'].values)
                 lower_original = preprocessor.inverse_transform(forecast_result['lower'].values)
                 upper_original = preprocessor.inverse_transform(forecast_result['upper'].values)
-                
+
                 # Create future forecast dataframe with proper index
                 last_date = full_data.index[-1]
                 freq = full_data.index.freq or pd.infer_freq(full_data.index)
@@ -346,32 +359,32 @@ class Experimenter:
                     f'{best_model_name}_upper': upper_original,
                     'confidence': self._calculate_confidence_level(forecast_original, lower_original, upper_original)
                 }, index=future_index)
-                
+
                 return future_df
             else:
                 # Fallback to regular forecast
                 future_forecast = full_model.forecast(periods)
-                
+
                 # Convert back to original scale
                 preprocessor = self.preprocessors[target_dataset]
                 if hasattr(future_forecast, 'yhat'):  # Prophet
                     future_values = future_forecast.yhat.values
                 else:
                     future_values = future_forecast.values if hasattr(future_forecast, 'values') else future_forecast
-                
+
                 future_original = preprocessor.inverse_transform(future_values)
-                
+
                 # Create future forecast dataframe with proper index
                 last_date = full_data.index[-1]
                 freq = full_data.index.freq or pd.infer_freq(full_data.index)
                 future_index = pd.date_range(start=last_date, periods=periods + 1, freq=freq)[1:]
-                
+
                 future_df = pd.DataFrame({
                     f'{best_model_name}_future': future_original
                 }, index=future_index)
-                
+
                 return future_df
-            
+
         except Exception as e:
             print(f"Error generating future forecasts: {str(e)}")
             return None
