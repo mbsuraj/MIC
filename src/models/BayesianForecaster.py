@@ -15,6 +15,7 @@ class BayesianForecaster(Forecaster):
         self.data = data
         self.trend = None
         self.seasonal = None
+        self.data_freq = data_freq
         self.seasonal_periods = self._get_seasonal_periods(data_freq)
         self.model = None
         self.metrics = {}
@@ -40,14 +41,14 @@ class BayesianForecaster(Forecaster):
             seasonal_raw = pm.Normal('seasonal_raw', mu=0, sigma=params.get('seasonal_sigma', 2), shape=self.seasonal_periods)
             sigma = pm.HalfNormal('sigma', sigma=params.get('obs_sigma', 3))
             seasonal = pm.Deterministic('seasonal', seasonal_raw - pm.math.mean(seasonal_raw))
-            
+
             t = np.arange(self.data.shape[0])
             seasonal_idx = t % self.seasonal_periods
             mean = baseline + trend * t + seasonal[seasonal_idx]
             obs = pm.Normal('obs', mu=mean, sigma=sigma, observed=self.data.values)
-            
+
             self.trace = pm.sample(draws=params.get('draws', 1000), tune=params.get('tune', 500), return_inferencedata=False, chains=2)
-        
+
         self.baseline = np.median(self.trace['baseline'])
         self.trend = np.median(self.trace['trend'])
         self.seasonal = np.median(self.trace['seasonal'], axis=0)
@@ -109,7 +110,7 @@ class BayesianForecaster(Forecaster):
         t = np.arange(start, start + steps)
         seasonal_idx = t % self.seasonal_periods
         forecasted_values = self.baseline + self.trend * t + self.seasonal[seasonal_idx]
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
         return pd.Series(forecasted_values, index=forecast_index)
 
     def plot_fit_vs_actual(self, steps):

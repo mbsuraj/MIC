@@ -8,7 +8,7 @@ import pickle
 import os
 
 class ProphetForecaster(Forecaster):
-    def __init__(self, data, name="prophet_model"):
+    def __init__(self, data, name="prophet_model", data_freq='W-Mon'):
         """
         Initialize the ProphetForecaster with time series data.
 
@@ -24,6 +24,7 @@ class ProphetForecaster(Forecaster):
         self.path = self.get_cache_path(name)
         self.fitted_values = None
         self.forecast_values = None
+        self.data_freq = data_freq
 
     def prepare_data(self):
         """
@@ -205,7 +206,7 @@ class ProphetForecaster(Forecaster):
         Returns:
         pd.DataFrame: Forecasted values including uncertainty intervals.
         """
-        future = self.model.make_future_dataframe(periods=steps, freq="W-MON")
+        future = self.model.make_future_dataframe(periods=steps, freq=self.data_freq)
         forecast = self.model.predict(future)
         return forecast.tail(steps)
     
@@ -220,7 +221,7 @@ class ProphetForecaster(Forecaster):
         Returns:
         dict: {'forecast': Series, 'lower': Series, 'upper': Series}
         """
-        future = self.model.make_future_dataframe(periods=steps, freq="W-MON")
+        future = self.model.make_future_dataframe(periods=steps, freq=self.data_freq)
         forecast = self.model.predict(future)
         forecast_tail = forecast.tail(steps)
         

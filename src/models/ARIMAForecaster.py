@@ -9,7 +9,7 @@ import os
 import random
 
 class ARIMAForecaster(Forecaster):
-    def __init__(self, data, order=(1, 0, 0), name="arima_model", data_freq_type='week'):
+    def __init__(self, data, order=(1, 0, 0), name="arima_model", data_freq_type='week', data_freq='W-Mon'):
         """
         Initialize the ARIMAForecaster with time series data and model order.
 
@@ -20,6 +20,7 @@ class ARIMAForecaster(Forecaster):
         """
         super().__init__()
         self.data = data
+        self.data_freq = data_freq
         self.order = order
         self.model = None
         self.fitted_model = None
@@ -223,7 +224,7 @@ class ARIMAForecaster(Forecaster):
         forecasted_values = self.fitted_model.forecast(steps=steps)
 
         # Create a datetime index for the forecast
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
 
         # Return as a pandas Series with DateTimeIndex
         return pd.Series(forecasted_values, index=forecast_index)
@@ -243,7 +244,7 @@ class ARIMAForecaster(Forecaster):
             raise ValueError("The model has not been fitted yet.")
             
         forecast_result = self.fitted_model.get_forecast(steps=steps)
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
         
         conf_int = forecast_result.conf_int(alpha=alpha)
         

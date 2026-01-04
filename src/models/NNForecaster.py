@@ -9,7 +9,7 @@ import pickle
 import os
 
 class NNForecaster(Forecaster):
-    def __init__(self, data, lags=10, name="neural_network_model"):
+    def __init__(self, data, lags=10, name="neural_network_model", data_freq='W-Mon'):
         """
         Initialize the NeuralNetworkForecaster with time series data and lags.
 
@@ -21,6 +21,7 @@ class NNForecaster(Forecaster):
         super().__init__()
         self.random_search_results = None
         self.data = data
+        self.data_freq = data_freq
         self.lags = lags
         self.model = MLPRegressor(hidden_layer_sizes=(100,), max_iter=500)
         self.metrics = None
@@ -242,7 +243,7 @@ class NNForecaster(Forecaster):
         if self.feature_data is None:
             self.create_features()
 
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
         forecasted_values = []
 
         last_known_data = self.feature_data.iloc[-1].drop("value")

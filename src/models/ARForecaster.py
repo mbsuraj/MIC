@@ -10,7 +10,7 @@ import os
 import random
 
 class ARForecaster(Forecaster):
-    def __init__(self, data, lags=1, name="ar_model"):
+    def __init__(self, data, lags=1, name="ar_model", data_freq='W-Mon'):
         """
         Initialize the ARForecaster with time series data and number of lags.
 
@@ -20,6 +20,7 @@ class ARForecaster(Forecaster):
         """
         super().__init__()
         self.data = data
+        self.data_freq = data_freq
         self.lags = lags
         self.model = None
         self.fitted_model = None
@@ -201,7 +202,7 @@ class ARForecaster(Forecaster):
                                                       dynamic=False)
 
         # Create a datetime index for the forecast
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
 
         # Return as a pandas Series with DateTimeIndex
         return pd.Series(forecasted_values, index=forecast_index)

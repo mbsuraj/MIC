@@ -9,7 +9,7 @@ import os
 import random
 
 class HoltWintersForecaster(Forecaster):
-    def __init__(self, data, trend='add', seasonal='add', seasonal_periods=365, data_freq="Day", name="HoltWinters_model", data_freq_type='week'):
+    def __init__(self, data, trend='add', seasonal='add', seasonal_periods=365, data_freq='W-Mon', name="HoltWinters_model", data_freq_type='week'):
         """
         Initialize the HoltWintersForecaster with time series data and model configuration.
 
@@ -21,6 +21,7 @@ class HoltWintersForecaster(Forecaster):
         """
         super().__init__()
         self.data = data
+        self.data_freq = data_freq
         self.trend = trend
         self.seasonal = seasonal
         self.seasonal_periods = self._get_seasonal_periods(data_freq_type)
@@ -222,7 +223,7 @@ class HoltWintersForecaster(Forecaster):
         forecasted_values = self.fitted_model.forecast(steps=steps)
 
         # Create a datetime index for the forecast
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
 
         # Return as a pandas Series with DateTimeIndex
         return pd.Series(forecasted_values, index=forecast_index)

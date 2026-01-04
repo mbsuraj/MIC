@@ -24,6 +24,7 @@ class ETSForecaster(Forecaster):
         self.fitted_values = None
         self.forecast_values = None
         self.data_freq_type = data_freq_type
+        self.data_freq = data_freq
 
     def _get_seasonal_periods(self, data_freq_type):
         output_dict = {"day": [7, 30, 120, 365],
@@ -118,7 +119,7 @@ class ETSForecaster(Forecaster):
             raise ValueError("Model not fitted.")
 
         forecasted_values = self.fitted_model.forecast(steps=steps)
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
         return pd.Series(forecasted_values, index=forecast_index)
     
     def forecast_with_intervals(self, steps, alpha=0.05):
@@ -140,7 +141,7 @@ class ETSForecaster(Forecaster):
                                                            simulate=True,
                                                            simulate_repetitions=3000)
         conf_int = forecast_result.pred_int(alpha=alpha)
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
 
         return {
             'forecast': pd.Series(forecast_result.predicted_mean, index=forecast_index),

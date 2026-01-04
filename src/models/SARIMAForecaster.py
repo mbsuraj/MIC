@@ -7,7 +7,7 @@ import pickle
 import os
 
 class SARIMAForecaster(Forecaster):
-    def __init__(self, data, order=(1, 0, 0), seasonal_order=(0, 0, 0, 0), name="sarima_model"):
+    def __init__(self, data, order=(1, 0, 0), seasonal_order=(0, 0, 0, 0), name="sarima_model", data_freq='W-Mon'):
         """
         Initialize the SARIMAForecaster with time series data and model order.
 
@@ -19,6 +19,7 @@ class SARIMAForecaster(Forecaster):
         """
         super().__init__()
         self.data = data
+        self.data_freq = data_freq
         self.order = order
         self.seasonal_order = seasonal_order
         self.model = None
@@ -107,7 +108,7 @@ class SARIMAForecaster(Forecaster):
         forecasted_values = self.fitted_model.get_forecast(steps=steps).predicted_mean
 
         # Create a datetime index for the forecast
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
 
         # Return as a pandas Series with DateTimeIndex
         return pd.Series(forecasted_values, index=forecast_index)

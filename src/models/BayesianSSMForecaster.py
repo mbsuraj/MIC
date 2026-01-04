@@ -13,6 +13,7 @@ class BayesianSSMForecaster(Forecaster):
     def __init__(self, data, data_freq='W-MON', name="bayesian_ssm_model"):
         super().__init__()
         self.baseline = None
+        self.data_freq = data_freq
         self.trace = None
         self.data = data
         self.trend = None
@@ -87,7 +88,7 @@ class BayesianSSMForecaster(Forecaster):
 
     def forecast(self, steps):
         forecasted_values = self._forecast_values(self.data.index[-1], steps).flatten()
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
         return pd.Series(forecasted_values, index=forecast_index)
 
     def plot_fit_vs_actual(self, steps):

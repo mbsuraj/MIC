@@ -1,10 +1,10 @@
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 
 class DataPreprocessor:
     def __init__(self, data):
         self.original_data = data
-        self.scaler = StandardScaler()
+        self.scaler = RobustScaler()
         self.scaled_data = self._scale_data()
     
     def _scale_data(self):

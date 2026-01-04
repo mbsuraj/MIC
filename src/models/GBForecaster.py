@@ -8,7 +8,7 @@ import pickle
 import os
 
 class GBForecaster(Forecaster):
-    def __init__(self, data, lags=10, name="gradient_boosting_model"):
+    def __init__(self, data, lags=10, name="gradient_boosting_model", data_freq='W-Mon'):
         """
         Initialize the GradientBoostingForecaster with time series data and lags.
 
@@ -20,6 +20,7 @@ class GBForecaster(Forecaster):
         super().__init__()
         self.random_search_results = None
         self.data = data
+        self.data_freq = data_freq
         self.lags = lags
         self.model = LGBMRegressor()
         self.metrics = None
@@ -257,7 +258,7 @@ class GBForecaster(Forecaster):
         if self.feature_data is None:
             self.create_features()
 
-        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq="W-MON")[1:]
+        forecast_index = pd.date_range(start=self.data.index[-1], periods=steps + 1, freq=self.data_freq)[1:]
         forecasted_values = []
 
         last_known_data = self.feature_data.iloc[-1].drop("value")
