@@ -51,8 +51,8 @@ class Experimenter:
             # "holt_winters_forecaster": HoltWintersForecaster,
             "ets_forecaster": ETSForecaster,
             "arima_forecaster": ARIMAForecaster,
-            # "bayesian_forecaster": BayesianForecaster,
-            # "bayesian_ssm_forecaster": BayesianSSMForecaster
+            "bayesian_forecaster": BayesianForecaster,
+            "bayesian_ssm_forecaster": BayesianSSMForecaster
         }
 
     def _get_parametric_forecasters_kwargs(self, model_name, dataset_name):

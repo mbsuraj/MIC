@@ -99,24 +99,10 @@ MIC/
 
 ## Installation
 
-### Backend Requirements
+### Backend and Frontend Requirements
 
 ```bash
 pip install -r requirements.txt
-```
-
-### Web Interface Requirements
-
-The web interface has additional dependencies. Install them with:
-
-```bash
-pip install -r web/requirements.txt
-```
-
-Or install both together:
-
-```bash
-pip install -r requirements.txt && pip install -r web/requirements.txt
 ```
 
 ## Quick Start
@@ -125,7 +111,7 @@ pip install -r requirements.txt && pip install -r web/requirements.txt
 
 1. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt && pip install -r web/requirements.txt
+   pip install -r requirements.txt
    ```
 
 2. **Launch the web interface:**
@@ -146,57 +132,14 @@ pip install -r requirements.txt && pip install -r web/requirements.txt
    - Upload CSV with date and value columns
    - Configure data frequency
    - Run the forecasting pipeline
-   - View interactive dashboard with model comparisons
+   - View interactive dashboard with model forecasts
 
-### Command Line Usage
-
-```python
-from src.common.experimenter import Experimenter
-
-# Run complete experiment pipeline
-experimenter = Experimenter()
-experimenter.run_experiment()
-```
-
-### Custom Workflow
-
-```python
-from src.common.experimenter import Experimenter
-
-# Load and preprocess data
-experimenter = Experimenter()
-experimenter.load_datasets()
-experimenter.split_train_test()
-
-# Train specific models
-experimenter.load_forecasters()
-experimenter.define_fit_and_save_models()
-
-# Generate forecasts
-experimenter.forecast_from_models()
-experimenter.export_experiment_results()
-```
-
-## Configuration
-
-### Data Configuration
-
-Configure datasets in `config/data_config.json`:
-
-```json
-{
-  "dataset_name": {
-    "format": "%Y-%m-%d",
-    "freq": "W-MON"
-  }
-}
-```
-
-### Data Format
-
+### Using Command Line / Python
+1. **Upload Data**  
 Input CSV files should contain:
 - `date` column in YYYY-MM-DD format
-- One or more numeric value columns
+- One numeric value column
+- The name of the file should be of format <dataset_name>. 
 
 Example:
 ```csv
@@ -205,9 +148,24 @@ date,value
 2023-01-08,105
 2023-01-15,98
 ```
+2. **Upload Data Configuration** 
+Configure datasets in `config/data_config.json`:
+
+```json
+{
+  "dataset_name": {
+    "format": "%Y-%m-%d",
+    "freq": "W-MON",
+    "freq_type": "week"
+  }
+}
+```
+3. **Run the code**
+```commandline
+python3.12 src/main.py
+```
 
 ## Dependencies
-
 Key dependencies include:
 - **prophet**: Facebook's Prophet time series library
 - **statsmodels**: Statistical modeling package (ARIMA, ETS, Holt-Winters)
@@ -220,7 +178,7 @@ Key dependencies include:
 - **plotly**: Interactive visualizations
 - **scipy**: Scientific computing
 
-See [requirements.txt](requirements.txt) and [web/requirements.txt](web/requirements.txt) for complete dependency lists.
+See [requirements.txt](requirements.txt) for complete dependency lists.
 
 ## Project Components
 
@@ -308,7 +266,7 @@ Results are exported to the `output/` directory with:
 
 ### Model Parameters
 
-Models support automatic hyperparameter tuning with customizable parameter grids. Key parameters include:
+Models support automatic hyperparameter tuning with customizable parameter grids. examples below:
 
 - **ARIMA**: Order (p,d,q), seasonal components, trend terms
 - **Prophet**: Changepoint sensitivity, seasonality modes, holiday effects
@@ -343,31 +301,9 @@ The framework has been tested with various time series including:
 - Economic indicators (gold prices, gas prices)
 - Health data (COVID cases, influenza)
 
-## Advanced Features
-
-### Model Persistence
-
-```python
-# Models are automatically saved during training
-model.save_model()
-
-# Load previously trained models
-model.load_model()
-```
-
-### Custom Metrics
-
-Add custom evaluation metrics in `src/common/utils.py`:
-
-```python
-def custom_metric(y_true, y_pred):
-    # Your metric implementation
-    return metric_value
-```
-
 ## Requirements
 
-- Python 3.8+
+- Python 3.10+
 - pandas, numpy, scikit-learn
 - statsmodels, prophet
 - PyMC, ArviZ (for Bayesian models)

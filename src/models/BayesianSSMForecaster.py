@@ -82,9 +82,26 @@ class BayesianSSMForecaster(Forecaster):
         }, index=self.data.index)
 
     def _forecast_values(self, start, periods):
-        fc = self.model.forecast(idata=self.trace, start=start, periods=periods)
-        vals = fc.forecast_observed.mean(dim=['chain', 'draw']).values.flatten()
-        return vals
+        try:
+            fc = self.model.forecast(idata=self.trace, start=start, periods=periods)
+            vals = fc.forecast_observed.mean(dim=['chain', 'draw']).values.flatten()
+            return vals
+        except np.linalg.LinAlgError as e:
+            if "SVD did not converge" in str(e):
+                # Create subset trace with fewer samples
+                subset_trace = {}
+                for key, value in self.trace.items():
+                    if hasattr(value, 'shape') and len(value.shape) > 1:
+                        # Take first half of samples
+                        subset_trace[key] = value[:len(value) // 2]
+                    else:
+                        subset_trace[key] = value
+
+                fc = self.model.forecast(idata=subset_trace, start=start, periods=periods)
+                vals = fc.forecast_observed.mean(dim=['chain', 'draw']).values.flatten()
+                return vals
+            else:
+                raise
 
     def forecast(self, steps):
         forecasted_values = self._forecast_values(self.data.index[-1], steps).flatten()

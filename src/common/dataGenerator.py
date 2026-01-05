@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import json
+DIRECTORY_PATH = f"{os.getcwd()}/data/"
 
 
 class DataGenerator:
@@ -113,6 +114,68 @@ class DataGenerator:
         for filename in os.listdir(self._directory):
             if filename.endswith('.csv'):
                 filepath = os.path.join(self._directory, filename)
-                df = pd.read_csv(filepath)
-                dataset_name = filename.replace(".csv", "")
-                self.all_data_dict[dataset_name] = df
+                test = TestDatasetCriteria(filepath)
+                if test.test_dataset_is_good_overall():
+                    df = pd.read_csv(filepath)
+                    dataset_name = filename.replace(".csv", "")
+                    self.all_data_dict[dataset_name] = df
+                else:
+                    raise ValueError(f"Dataset {filename} does not meet the criteria for inclusion.")
+
+class TestDatasetCriteria:
+
+    def __init__(self, file_path):
+        self._alpha = 0.05
+        self.file_path = file_path
+        self.filepath_format_is_csv = self.test_filepath_format()
+        self.index_0_is_date = False
+        self.single_dimensional_data = False
+        self.first_column_is_named_date = False
+        self.ts = self.load_dataset()
+        self.has_sufficient_size = self.test_datasize()
+
+    def test_filepath_format(self):
+        return self.file_path.find(".csv") != -1
+
+    def load_dataset(self):
+        real_dataset = pd.read_csv(self.file_path, index_col=0, header=0)
+        self.single_dimensional_data = self.test_if_single_dimension(real_dataset)
+        self.first_column_is_named_date = self.test_first_column_is_date_named(real_dataset)
+        try:
+            real_dataset.index = pd.to_datetime(real_dataset.index, format='%m/%d/%y')
+            self.index_0_is_date = True
+        except ValueError:
+            self.index_0_is_date = False
+        real_dataset = real_dataset.iloc[:, 0]
+        return real_dataset
+
+    def test_first_column_is_date_named(self, data):
+        """
+        Check if the first column is named 'date'
+        """
+        return data.index.name == 'date'
+
+    def test_datasize(self):
+        return self.ts.shape[0] >= 156
+
+    def test_if_single_dimension(self, data):
+        return data.shape[1] == 1
+
+    def test_dataset_is_good_overall(self):
+        print(f"has_sufficient_size: {self.has_sufficient_size}")
+        print(f"filepath_format_is_csv: {self.filepath_format_is_csv}")
+        print(f"single_dimensional_data: {self.single_dimensional_data}")
+        print(f"first_column_is_named_date: {self.first_column_is_named_date}")
+        if self.has_sufficient_size and self.filepath_format_is_csv and self.single_dimensional_data and self.first_column_is_named_date:
+            return True
+        else:
+            return False
+
+# if __name__ == "__main__":
+#     for filename in os.listdir(DIRECTORY_PATH):
+#         if filename.endswith('.csv'):
+#             print(f"Fiename: {filename}")
+#             filepath = os.path.join(DIRECTORY_PATH, filename)
+#             test = TestDatasetCriteria(filepath)
+#             test.test_dataset_is_good_overall()
+#             print("\n\n")
