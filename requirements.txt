@@ -14,3 +14,4 @@ xarray-einstats==0.9.1
 lightgbm==4.6.0
 streamlit>=1.28.0
 plotly>=5.15.0
+requests>=2.31.0
