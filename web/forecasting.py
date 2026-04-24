@@ -7,6 +7,13 @@ import subprocess
 
 def run_forecasting():
     """Prepare data and run the forecasting pipeline"""
+    # Demo data: pre-computed results already exist, skip straight to dashboard
+    if st.session_state.project_data.get('is_demo', False):
+        st.session_state.step = 4
+        st.success("✅ Loading pre-computed demo results!")
+        st.rerun()
+        return
+
     with st.spinner("📊 Running forecasting models... This may take a few minutes."):
         try:
             # Get absolute paths

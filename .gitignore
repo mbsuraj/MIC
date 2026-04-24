@@ -7,3 +7,13 @@ archive
 *.log
 __pycache__
 airflow
+
+# Allow demo pre-computed results
+!output/testing_results.csv
+!output/training_results.csv
+!output/forecasts/parametric/tsa_checkpoint_travel_count_mon_weekly.csv
+!output/forecasts/non_parametric/tsa_checkpoint_travel_count_mon_weekly.csv
+!output/fits/parametric/tsa_checkpoint_travel_count_mon_weekly.csv
+!output/fits/non_parametric/tsa_checkpoint_travel_count_mon_weekly.csv
+!data/tsa_checkpoint_travel_count_mon_weekly.csv
+!config/data_config.json

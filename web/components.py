@@ -95,6 +95,7 @@ def show_data_upload_step():
         try:
             df = pd.read_csv(demo_path)
             st.info("📂 Using demo dataset: **TSA Checkpoint Travel Numbers** (weekly)")
+            st.session_state.project_data['is_demo'] = True
             data_configured = _configure_data(df, "tsa_checkpoint_travel_count_mon_weekly")
         except Exception as e:
             st.error(f"❌ Could not load demo data: {str(e)}")
@@ -110,6 +111,7 @@ def show_data_upload_step():
                 df = pd.read_csv(uploaded_file)
                 st.success("✅ File uploaded successfully!")
                 project_name = uploaded_file.name.replace('.csv', '').replace(' ', '_').lower()
+                st.session_state.project_data['is_demo'] = False
                 data_configured = _configure_data(df, project_name)
             except Exception as e:
                 st.error(f"❌ Error reading file: {str(e)}")

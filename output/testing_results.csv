@@ -1,0 +1,8 @@
+dataset_name,model_name,mape,smape,cumulative_error_percentage,weighted_mape,error_std
+tsa_checkpoint_travel_count_mon_weekly,ets_forecaster,0.02,0.02,0.01,0.02,517931.70431252767
+tsa_checkpoint_travel_count_mon_weekly,arima_forecaster,0.07,0.07,0.07,0.07,749234.6788860722
+tsa_checkpoint_travel_count_mon_weekly,gb_forecaster,0.05,0.04,0.03,0.04,842197.7562930267
+tsa_checkpoint_travel_count_mon_weekly,rt_forecaster,0.05,0.05,0.02,0.05,921368.2515905095
+tsa_checkpoint_travel_count_mon_weekly,sv_forecaster,0.03,0.03,0.0,0.03,684298.178117425
+tsa_checkpoint_travel_count_mon_weekly,nn_forecaster,0.04,0.04,0.02,0.04,711567.9248657399
+tsa_checkpoint_travel_count_mon_weekly,prophet_forecaster,0.05,0.05,0.05,0.05,648485.5202764675
