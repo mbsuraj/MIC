@@ -82,11 +82,11 @@ class BayesianForecaster(Forecaster):
             # Likelihood
             obs = pm.Normal('obs', mu=mean, sigma=sigma, observed=self.data.values)
 
-            # Sample
-            self.trace = pm.sample(draws=10_500,
-                                   tune=1_000,
+            # Sample — lean settings for faster turnaround
+            self.trace = pm.sample(draws=2_000,
+                                   tune=500,
                                    return_inferencedata=False,
-                                   chains=4,
+                                   chains=2,
                                    nuts_sampler='pymc',
                                    )
 

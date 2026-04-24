@@ -162,23 +162,25 @@ class SVForecaster(Forecaster):
         X = self.feature_data.drop("value", axis=1)
         y = self.feature_data["value"]
 
-        # Default parameter grid for LightGBM
+        # Lean parameter grid for SVR
         param_grid = {
-            'kernel': ['rbf', 'linear'],  # most effective kernels for time series
-            'C': [0.1, 1.0, 10.0],  # regularization parameter
-            'gamma': ['scale', 'auto', 0.1],  # kernel coefficient
-            'epsilon': [0.01, 0.1],  # margin of tolerance
-            'shrinking': [True],  # use shrinking heuristic
-            'tol': [1e-3],  # tolerance for stopping criterion
-            'cache_size': [200],  # kernel cache size in MB
-            'max_iter': [1000]  # maximum number of iterations
+            'kernel': ['rbf', 'linear'],
+            'C': [0.1, 1.0, 10.0],
+            'gamma': ['scale', 'auto'],
+            'epsilon': [0.01, 0.1],
+            'shrinking': [True],
+            'tol': [1e-3],
+            'cache_size': [200],
+            'max_iter': [1000]
         }
 
-        # Perform grid search
+        # Perform randomized search with reduced iterations and folds
         self.model = self.perform_randomized_search(
             X=X,
             y=y,
-            param_grid=param_grid
+            param_grid=param_grid,
+            n_iter=20,
+            cv=3
         )
 
         # Final fit with best parameters

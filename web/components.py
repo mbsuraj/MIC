@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 def show_uncertainty_type_step():
     st.markdown('<div class="question-container">', unsafe_allow_html=True)
@@ -27,73 +28,92 @@ def show_uncertainty_type_step():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+def _configure_data(df, project_name):
+    """Shared helper: preview data, pick frequency, store in session state.
+    Returns True when configuration is complete."""
+    # Validate data format
+    if 'date' not in df.columns or len(df.columns) < 2:
+        st.error("❌ Please ensure your CSV has 'date' and at least one value column")
+        return False
+
+    st.markdown("**Data Preview:**")
+    st.dataframe(df.head(), use_container_width=True)
+
+    st.session_state.project_data['name'] = project_name
+    st.session_state.project_data['dataframe'] = df
+
+    st.markdown("### ⚙️ How often does your data occur?")
+
+    freq_options = {
+        "Daily": ("D", "day"),
+        "Weekly (Monday)": ("W-MON", "week"),
+        "Weekly (Sunday)": ("W-SUN", "week"),
+        "Monthly": ("M", "month"),
+        "Quarterly": ("Q", "quarter"),
+        "Yearly": ("Y", "year")
+    }
+
+    selected_freq = st.selectbox(
+        "Select your data frequency:",
+        options=list(freq_options.keys()),
+        index=1  # Default to Weekly (Monday)
+    )
+
+    freq, freq_type = freq_options[selected_freq]
+    st.session_state.project_data['freq'] = freq
+    st.session_state.project_data['freq_type'] = freq_type
+    return True
+
+
 def show_data_upload_step():
     st.markdown('<div class="question-container">', unsafe_allow_html=True)
     st.markdown("### 📊 Upload and configure your data")
     st.markdown("We need dates (YYYY-MM-DD format) and numbers. Here's what your data should look like:")
-    
+
     # Show sample data format
     sample_data = pd.DataFrame({
         'date': ['2023-01-01', '2023-01-08', '2023-01-15', '2023-01-22'],
         'value': [100, 105, 98, 110]
     })
     st.dataframe(sample_data, use_container_width=True)
-    
-    uploaded_file = st.file_uploader(
-        "Choose a CSV file",
-        type=['csv'],
-        help="Your CSV should have 'date' and 'value' columns"
+
+    # --- Demo / Upload toggle ---
+    data_source = st.radio(
+        "Choose a data source:",
+        ["Upload my own CSV", "Try with demo data (TSA Travel)"],
+        horizontal=True,
+        key="data_source"
     )
-    
+
     data_configured = False
-    
-    if uploaded_file is not None:
+
+    if data_source == "Try with demo data (TSA Travel)":
+        demo_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "..", "data", "tsa_checkpoint_travel_count_mon_weekly.csv"
+        )
         try:
-            df = pd.read_csv(uploaded_file)
-            st.success("✅ File uploaded successfully!")
-            
-            # Validate data format
-            if 'date' not in df.columns or len(df.columns) < 2:
-                st.error("❌ Please ensure your CSV has 'date' and at least one value column")
-                return
-            
-            # Show preview
-            st.markdown("**Data Preview:**")
-            st.dataframe(df.head(), use_container_width=True)
-            
-            # Extract project name from filename
-            project_name = uploaded_file.name.replace('.csv', '').replace(' ', '_').lower()
-            st.session_state.project_data['name'] = project_name
-            
-            # Save the data
-            st.session_state.project_data['dataframe'] = df
-            
-            # Data frequency configuration
-            st.markdown("### ⚙️ How often does your data occur?")
-            
-            freq_options = {
-                "Daily": ("D", "day"),
-                "Weekly (Monday)": ("W-MON", "week"),
-                "Weekly (Sunday)": ("W-SUN", "week"),
-                "Monthly": ("M", "month"),
-                "Quarterly": ("Q", "quarter"),
-                "Yearly": ("Y", "year")
-            }
-            
-            selected_freq = st.selectbox(
-                "Select your data frequency:",
-                options=list(freq_options.keys()),
-                index=1  # Default to Weekly (Monday)
-            )
-            
-            freq, freq_type = freq_options[selected_freq]
-            st.session_state.project_data['freq'] = freq
-            st.session_state.project_data['freq_type'] = freq_type
-            data_configured = True
-                    
+            df = pd.read_csv(demo_path)
+            st.info("📂 Using demo dataset: **TSA Checkpoint Travel Numbers** (weekly)")
+            data_configured = _configure_data(df, "tsa_checkpoint_travel_count_mon_weekly")
         except Exception as e:
-            st.error(f"❌ Error reading file: {str(e)}")
-    
+            st.error(f"❌ Could not load demo data: {str(e)}")
+    else:
+        uploaded_file = st.file_uploader(
+            "Choose a CSV file",
+            type=['csv'],
+            help="Your CSV should have 'date' and 'value' columns"
+        )
+
+        if uploaded_file is not None:
+            try:
+                df = pd.read_csv(uploaded_file)
+                st.success("✅ File uploaded successfully!")
+                project_name = uploaded_file.name.replace('.csv', '').replace(' ', '_').lower()
+                data_configured = _configure_data(df, project_name)
+            except Exception as e:
+                st.error(f"❌ Error reading file: {str(e)}")
+
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
@@ -104,7 +124,7 @@ def show_data_upload_step():
         if st.button("Next →", disabled=not data_configured, use_container_width=True):
             st.session_state.step = 3
             st.rerun()
-    
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 def show_ready_step():

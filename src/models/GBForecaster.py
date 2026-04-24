@@ -175,24 +175,26 @@ class GBForecaster(Forecaster):
         X = self.feature_data.drop("value", axis=1)
         y = self.feature_data["value"]
 
-        # Default parameter grid for LightGBM
+        # Lean parameter grid for LightGBM — focused on high-impact params
         param_grid = {
-            'num_leaves': [15, 31, 50],  # reduced leaf count for smaller dataset
-            'max_depth': [5, 8],  # more controlled depth
-            'learning_rate': [0.05, 0.1],  # slightly higher learning rates
-            'n_estimators': [50, 100, 150],  # reduced number of trees
-            'min_child_samples': [10, 20],  # adjusted for dataset size
-            'subsample': [0.8, 0.9],  # good range for smaller datasets
-            'colsample_bytree': [0.8, 0.9],  # feature subsampling
-            'reg_alpha': [0.1, 0.5],  # increased regularization
-            'reg_lambda': [0.1, 0.5]  # increased regularization
+            'num_leaves': [15, 31],
+            'max_depth': [5, 8],
+            'learning_rate': [0.05, 0.1],
+            'n_estimators': [50, 100],
+            'min_child_samples': [10, 20],
+            'subsample': [0.8],
+            'colsample_bytree': [0.8],
+            'reg_alpha': [0.1],
+            'reg_lambda': [0.1]
         }
 
-        # Perform grid search
+        # Perform randomized search with reduced iterations and folds
         self.model = self.perform_randomized_search(
             X=X,
             y=y,
-            param_grid=param_grid
+            param_grid=param_grid,
+            n_iter=20,
+            cv=3
         )
 
         # Final fit with best parameters

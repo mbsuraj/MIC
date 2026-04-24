@@ -68,7 +68,7 @@ class BayesianSSMForecaster(Forecaster):
             self.model.build_statespace_graph(values)
             self.trace = pm.sample(draws=500,
                                    tune=100,
-                                   chains=4,
+                                   chains=2,
                                    nuts_sampler='pymc',
                                    return_inferencedata=False,
                                    target_accept=0.9,

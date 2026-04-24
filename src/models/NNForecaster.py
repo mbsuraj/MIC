@@ -162,25 +162,26 @@ class NNForecaster(Forecaster):
         X = self.feature_data.drop("value", axis=1)
         y = self.feature_data["value"]
 
-        # Default parameter grid for LightGBM
+        # Lean parameter grid for MLPRegressor — fewer combos, early stopping handles the rest
         param_grid = {
-            'hidden_layer_sizes': [(1,), (10,), (20,), (10, 5),],  # smaller architectures to prevent overfitting
-            'activation': ['relu', 'tanh'],  # keeping both as they're commonly effective
-            'solver': ['adam'],  # adam is generally the best choice for smaller datasets
-            'alpha': [0.001, 0.01, 0.1],  # slightly stronger regularization
-            'learning_rate': ['adaptive'],  # adaptive is better for smaller datasets
-            'max_iter': [1000],  # increased to ensure convergence
-            'batch_size': [16, 32, 64],  # smaller batch sizes for smaller dataset
-            # 'random_state': [42],  # for reproducibility
-            'early_stopping': [True],  # add early stopping to prevent overfitting
-            'validation_fraction': [0.2]  # 20% of training data for validation
+            'hidden_layer_sizes': [(10,), (20,), (10, 5)],
+            'activation': ['relu', 'tanh'],
+            'solver': ['adam'],
+            'alpha': [0.01, 0.1],
+            'learning_rate': ['adaptive'],
+            'max_iter': [500],  # early stopping will kick in well before this
+            'batch_size': [32],
+            'early_stopping': [True],
+            'validation_fraction': [0.2]
         }
 
-        # Perform grid search
+        # Perform randomized search with reduced iterations and folds
         self.model = self.perform_randomized_search(
             X=X,
             y=y,
-            param_grid=param_grid
+            param_grid=param_grid,
+            n_iter=12,
+            cv=3
         )
 
         # Final fit with best parameters

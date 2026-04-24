@@ -160,23 +160,24 @@ class RTForecaster(Forecaster):
         X = self.feature_data.drop("value", axis=1)
         y = self.feature_data["value"]
 
-        # Default parameter grid for LightGBM
+        # Lean parameter grid for RandomForest
         param_grid = {
-            'n_estimators': [50, 100, 150],  # reduced number of trees for smaller dataset
-            'max_depth': [5, 10, 15],  # reduced depth to prevent overfitting
-            'min_samples_split': [5, 10],  # increased minimum samples for more stable splits
-            'min_samples_leaf': [4, 8],  # increased leaf size for better generalization
-            'max_features': ['sqrt', 'log2'],  # standard feature selection methods
-            'bootstrap': [True],  # keep bootstrapping enabled
-            # 'random_state': [42],  # for reproducibility
-            'max_samples': [0.8]  # simplified to single value for stability
+            'n_estimators': [50, 100],
+            'max_depth': [5, 10],
+            'min_samples_split': [5, 10],
+            'min_samples_leaf': [4, 8],
+            'max_features': ['sqrt'],
+            'bootstrap': [True],
+            'max_samples': [0.8]
         }
 
-        # Perform grid search
+        # Perform randomized search with reduced iterations and folds
         self.model = self.perform_randomized_search(
             X=X,
             y=y,
-            param_grid=param_grid
+            param_grid=param_grid,
+            n_iter=16,
+            cv=3
         )
 
         # Final fit with best parameters
