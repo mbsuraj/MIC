@@ -4,3 +4,6 @@
 archive
 *.csv
 .idea/
+*.log
+__pycache__
+airflow
