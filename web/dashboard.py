@@ -241,11 +241,14 @@ def show_results_dashboard():
 
             export_data.index.name = 'date'
 
-            csv_data = export_data.rename(columns={
+            rename_map = {
                 'y_true': 'actual',
                 f'{best_model_name}': 'model_fit',
                 f'{best_model_name}_future': 'forecast'
-            }).loc[:, ['actual', 'model_fit', 'forecast', 'confidence']].to_csv()
+            }
+            export_data = export_data.rename(columns=rename_map)
+            export_cols = [c for c in ['actual', 'model_fit', 'forecast', 'confidence'] if c in export_data.columns]
+            csv_data = export_data.loc[:, export_cols].to_csv()
 
             st.download_button(
                 label="📥 Download Best Model Results (CSV)",
