@@ -97,7 +97,7 @@ def generate_future_forecasts(best_model_name, project_name):
             
             # Generate future forecasts for specific dataset and model
             future_df = experimenter.retrain_best_model_and_forecast_future(best_model_name, dataset_name, periods=52)
-            if not future_df.empty:
+            if future_df is not None and not future_df.empty:
                 st.success("✅ Forecasts generated!")
             else:
                 st.warning(f"Could not generate future forecasts - method returned None for model: {best_model_name}")

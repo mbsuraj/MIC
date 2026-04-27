@@ -1,0 +1,876 @@
+[
+    {
+        "date": "2026-01-02_20-19-58",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.11256667756267281,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_20-20-03",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 1,
+            "d": 0,
+            "q": 1,
+            "P": 0,
+            "D": 0,
+            "Q": 1,
+            "s": 12,
+            "trend": "t",
+            "seasonal": true
+        },
+        "best_score": 0.3425400295131157,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_20-20-07",
+        "model": "SVM",
+        "best_params": {
+            "tol": 0.001,
+            "shrinking": true,
+            "max_iter": 1000,
+            "kernel": "linear",
+            "gamma": "scale",
+            "epsilon": 0.1,
+            "cache_size": 200,
+            "C": 0.1
+        },
+        "best_score": -0.04511794147183081,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_sv_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-40-32",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.11256667756267281,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-41-27",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 2,
+            "d": 0,
+            "q": 1,
+            "P": 1,
+            "D": 0,
+            "Q": 1,
+            "s": 12,
+            "trend": "t",
+            "seasonal": true
+        },
+        "best_score": 0.3436846204982908,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-41-34",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.1,
+            "seasonality_prior_scale": 0.1,
+            "holidays_prior_scale": 1.0,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 20
+        },
+        "best_score": 0.19877600165087428,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-43-07",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.4010495972684829,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store0product0qty_weekly_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-43-56",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 0,
+            "d": 0,
+            "q": 2,
+            "P": 0,
+            "D": 0,
+            "Q": 0,
+            "s": 4,
+            "trend": "c",
+            "seasonal": true
+        },
+        "best_score": 0.6461075502992347,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store0product0qty_weekly_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-44-13",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.1,
+            "seasonality_prior_scale": 0.1,
+            "holidays_prior_scale": 0.1,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 30
+        },
+        "best_score": 0.19112799083016335,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store0product0qty_weekly_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-46-48",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.37549724503362836,
+        "dataset_info": {
+            "n_samples": 419,
+            "dataset_name_and_type": "store5product7qty_weekly_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-48-02",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 3,
+            "d": 0,
+            "q": 1,
+            "P": 0,
+            "D": 0,
+            "Q": 2,
+            "s": 52,
+            "trend": "t",
+            "seasonal": true
+        },
+        "best_score": 0.6063321216715286,
+        "dataset_info": {
+            "n_samples": 419,
+            "dataset_name_and_type": "store5product7qty_weekly_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-48-18",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.5,
+            "seasonality_prior_scale": 0.1,
+            "holidays_prior_scale": 1.0,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 30
+        },
+        "best_score": 0.1321500329960544,
+        "dataset_info": {
+            "n_samples": 419,
+            "dataset_name_and_type": "store5product7qty_weekly_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-50-59",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.5224030961197219,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store5product7qty_weekly_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-51-13",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 0,
+            "d": 0,
+            "q": 1,
+            "P": 2,
+            "D": 0,
+            "Q": 1,
+            "s": 12,
+            "trend": "c",
+            "seasonal": true
+        },
+        "best_score": 0.7888721629537699,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store5product7qty_weekly_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-51-28",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.5,
+            "seasonality_prior_scale": 1.0,
+            "holidays_prior_scale": 1.0,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 30
+        },
+        "best_score": 0.18032042988526584,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store5product7qty_weekly_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-54-27",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.5224030961197219,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store5product7qty_weekly_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-55-04",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 1,
+            "d": 0,
+            "q": 3,
+            "P": 0,
+            "D": 0,
+            "Q": 1,
+            "s": 12,
+            "trend": "t",
+            "seasonal": true
+        },
+        "best_score": 0.9746206304691725,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store5product7qty_weekly_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_21-55-19",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.5,
+            "seasonality_prior_scale": 1.0,
+            "holidays_prior_scale": 0.1,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 30
+        },
+        "best_score": 0.18032042988526584,
+        "dataset_info": {
+            "n_samples": 418,
+            "dataset_name_and_type": "store5product7qty_weekly_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-07-28",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.12728380753961638,
+        "dataset_info": {
+            "n_samples": 209,
+            "dataset_name_and_type": "influenza_cases_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-07-55",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 2,
+            "d": 0,
+            "q": 2,
+            "P": 0,
+            "D": 0,
+            "Q": 2,
+            "s": 12,
+            "trend": "t",
+            "seasonal": true
+        },
+        "best_score": 0.15361645908339766,
+        "dataset_info": {
+            "n_samples": 209,
+            "dataset_name_and_type": "influenza_cases_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-08-14",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.01,
+            "seasonality_prior_scale": 0.1,
+            "holidays_prior_scale": 1.0,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 30
+        },
+        "best_score": 0.6678030002506392,
+        "dataset_info": {
+            "n_samples": 209,
+            "dataset_name_and_type": "influenza_cases_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-23-01",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": null,
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": false
+        },
+        "best_score": 0.579849120801172,
+        "dataset_info": {
+            "n_samples": 226,
+            "dataset_name_and_type": "walmartsales_foods_3_090_ca_1_evaluation_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-25-29",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 0,
+            "d": 0,
+            "q": 3,
+            "P": 2,
+            "D": 0,
+            "Q": 1,
+            "s": 4,
+            "trend": "c",
+            "seasonal": true
+        },
+        "best_score": 0.6421229144960902,
+        "dataset_info": {
+            "n_samples": 226,
+            "dataset_name_and_type": "walmartsales_foods_3_090_ca_1_evaluation_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-25-38",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.1,
+            "seasonality_prior_scale": 0.1,
+            "holidays_prior_scale": 1.0,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 20
+        },
+        "best_score": 0.7196338511207667,
+        "dataset_info": {
+            "n_samples": 226,
+            "dataset_name_and_type": "walmartsales_foods_3_090_ca_1_evaluation_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-27-16",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.184701637917547,
+        "dataset_info": {
+            "n_samples": 860,
+            "dataset_name_and_type": "wei_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-31-57",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 2,
+            "d": 0,
+            "q": 3,
+            "P": 1,
+            "D": 0,
+            "Q": 1,
+            "s": 52,
+            "trend": "c",
+            "seasonal": true
+        },
+        "best_score": 0.1818199501397323,
+        "dataset_info": {
+            "n_samples": 860,
+            "dataset_name_and_type": "wei_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-02_22-32-15",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.01,
+            "seasonality_prior_scale": 0.1,
+            "holidays_prior_scale": 0.1,
+            "seasonality_mode": "multiplicative",
+            "changepoint_range": 0.8,
+            "n_changepoints": 20
+        },
+        "best_score": 1.558419297338832,
+        "dataset_info": {
+            "n_samples": 860,
+            "dataset_name_and_type": "wei_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_17-35-15",
+        "model": "ets_forecaster",
+        "best_params": {
+            "error": "add",
+            "trend": "add",
+            "seasonal": "add",
+            "seasonal_periods": 52,
+            "damped_trend": true
+        },
+        "best_score": 0.10230365031186696,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_ets_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_17-36-02",
+        "model": "arima_forecaster",
+        "best_params": {
+            "p": 2,
+            "d": 0,
+            "q": 0,
+            "P": 2,
+            "D": 0,
+            "Q": 0,
+            "s": 52,
+            "trend": "ct",
+            "seasonal": true
+        },
+        "best_score": 0.24319721680766168,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_arima_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_17-36-15",
+        "model": "prophet_forecaster",
+        "best_params": {
+            "changepoint_prior_scale": 0.1,
+            "seasonality_prior_scale": 1.0,
+            "holidays_prior_scale": 0.1,
+            "seasonality_mode": "additive",
+            "changepoint_range": 0.8,
+            "n_changepoints": 30
+        },
+        "best_score": 0.19058609449338598,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_prophet_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_20-42-13",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.9,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 50,
+            "n_estimators": 100,
+            "min_child_samples": 10,
+            "max_depth": 5,
+            "learning_rate": 0.05,
+            "colsample_bytree": 0.9
+        },
+        "best_score": -0.09194436711850842,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_20-58-55",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.9,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 15,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 5,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.8
+        },
+        "best_score": -0.09226207844020053,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-18-26",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.8,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 31,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 5,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.8
+        },
+        "best_score": -0.09226207844020053,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-27-13",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.9,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 50,
+            "n_estimators": 100,
+            "min_child_samples": 10,
+            "max_depth": 5,
+            "learning_rate": 0.05,
+            "colsample_bytree": 0.9
+        },
+        "best_score": -0.09194436711850842,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-37-28",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.8,
+            "reg_lambda": 0.5,
+            "reg_alpha": 0.1,
+            "num_leaves": 31,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 8,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.8
+        },
+        "best_score": -0.0834168400192703,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-41-16",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.9,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 50,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 5,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.9
+        },
+        "best_score": -0.08413180824656007,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-45-07",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.9,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 31,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 8,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.9
+        },
+        "best_score": -0.08438922426645122,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-45-53",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.8,
+            "reg_lambda": 0.5,
+            "reg_alpha": 0.1,
+            "num_leaves": 50,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 5,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.9
+        },
+        "best_score": -0.0839211647215056,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-51-33",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.8,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 15,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 5,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.8
+        },
+        "best_score": -0.08413180824656007,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-54-23",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.9,
+            "reg_lambda": 0.5,
+            "reg_alpha": 0.1,
+            "num_leaves": 31,
+            "n_estimators": 100,
+            "min_child_samples": 10,
+            "max_depth": 8,
+            "learning_rate": 0.05,
+            "colsample_bytree": 0.9
+        },
+        "best_score": -0.08531765663217379,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_21-59-04",
+        "model": "gb_forecaster",
+        "best_params": {
+            "subsample": 0.9,
+            "reg_lambda": 0.1,
+            "reg_alpha": 0.1,
+            "num_leaves": 15,
+            "n_estimators": 50,
+            "min_child_samples": 10,
+            "max_depth": 8,
+            "learning_rate": 0.1,
+            "colsample_bytree": 0.9
+        },
+        "best_score": -0.08438922426645122,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_gb_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_22-05-43",
+        "model": "RandomForest",
+        "best_params": {
+            "n_estimators": 50,
+            "min_samples_split": 5,
+            "min_samples_leaf": 4,
+            "max_samples": 0.8,
+            "max_features": "log2",
+            "max_depth": 10,
+            "bootstrap": true
+        },
+        "best_score": -0.08792408521753038,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_rt_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_22-06-20",
+        "model": "RandomForest",
+        "best_params": {
+            "n_estimators": 50,
+            "min_samples_split": 5,
+            "min_samples_leaf": 4,
+            "max_samples": 0.8,
+            "max_features": "sqrt",
+            "max_depth": 5,
+            "bootstrap": true
+        },
+        "best_score": -0.08727742485309008,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_rt_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_22-06-20",
+        "model": "SVM",
+        "best_params": {
+            "tol": 0.001,
+            "shrinking": true,
+            "max_iter": 1000,
+            "kernel": "rbf",
+            "gamma": "scale",
+            "epsilon": 0.1,
+            "cache_size": 200,
+            "C": 10.0
+        },
+        "best_score": -0.04334874815771152,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_sv_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_22-10-32",
+        "model": "nn_forecaster",
+        "best_params": {
+            "validation_fraction": 0.2,
+            "solver": "adam",
+            "max_iter": 1000,
+            "learning_rate": "adaptive",
+            "hidden_layer_sizes": [
+                10
+            ],
+            "early_stopping": true,
+            "batch_size": 32,
+            "alpha": 0.1,
+            "activation": "relu"
+        },
+        "best_score": -0.04366984719326078,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_nn_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_22-14-55",
+        "model": "nn_forecaster",
+        "best_params": {
+            "validation_fraction": 0.2,
+            "solver": "adam",
+            "max_iter": 1000,
+            "learning_rate": "adaptive",
+            "hidden_layer_sizes": [
+                20,
+                10
+            ],
+            "early_stopping": true,
+            "batch_size": 32,
+            "alpha": 0.01,
+            "activation": "relu"
+        },
+        "best_score": -0.047017685179721144,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_nn_forecaster"
+        }
+    },
+    {
+        "date": "2026-01-03_22-28-34",
+        "model": "nn_forecaster",
+        "best_params": {
+            "validation_fraction": 0.2,
+            "solver": "adam",
+            "max_iter": 1000,
+            "learning_rate": "adaptive",
+            "hidden_layer_sizes": [
+                20
+            ],
+            "early_stopping": true,
+            "batch_size": 32,
+            "alpha": 0.1,
+            "activation": "relu"
+        },
+        "best_score": -0.052103446954583334,
+        "dataset_info": {
+            "n_samples": 180,
+            "dataset_name_and_type": "tsa_checkpoint_travel_count_mon_weekly_nn_forecaster"
+        }
+    }
+]

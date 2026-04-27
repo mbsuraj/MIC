@@ -23,3 +23,4 @@ airflow
 !cache/tsa_checkpoint_travel_count_mon_weekly_prophet_forecaster.pkl
 !cache/tsa_checkpoint_travel_count_mon_weekly_rt_forecaster.pkl
 !cache/tsa_checkpoint_travel_count_mon_weekly_sv_forecaster.pkl
+!model_search_results/hyperparameter_search_results.json
