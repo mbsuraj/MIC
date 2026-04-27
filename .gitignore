@@ -17,3 +17,9 @@ airflow
 !output/fits/non_parametric/tsa_checkpoint_travel_count_mon_weekly.csv
 !data/tsa_checkpoint_travel_count_mon_weekly.csv
 !config/data_config.json
+!cache/tsa_checkpoint_travel_count_mon_weekly_ets_forecaster.pkl
+!cache/tsa_checkpoint_travel_count_mon_weekly_gb_forecaster.pkl
+!cache/tsa_checkpoint_travel_count_mon_weekly_nn_forecaster.pkl
+!cache/tsa_checkpoint_travel_count_mon_weekly_prophet_forecaster.pkl
+!cache/tsa_checkpoint_travel_count_mon_weekly_rt_forecaster.pkl
+!cache/tsa_checkpoint_travel_count_mon_weekly_sv_forecaster.pkl
